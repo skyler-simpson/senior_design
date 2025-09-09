@@ -1,4 +1,4 @@
-# TEAM NAME
+# VATS
 
 ### Members
 Ary Sharma - <sharm3a8@mail.uc.edu>  
