@@ -454,10 +454,10 @@ script = ExtResource("1_o0lna")
 [node name="Sprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")
-animation = &"falling"
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(4, 8)
+position = Vector2(5, 8)
 shape = SubResource("RectangleShape2D_jdu6q")
 
 [node name="SwordArea" type="Area2D" parent="."]
@@ -467,5 +467,11 @@ collision_mask = 4
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SwordArea"]
 position = Vector2(68, 9)
 shape = SubResource("RectangleShape2D_o0lna")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.1, 1.1)
+limit_left = 0
+limit_right = 2290
+limit_bottom = 640
 
 [connection signal="body_entered" from="SwordArea" to="." method="_on_sword_area_body_entered"]
