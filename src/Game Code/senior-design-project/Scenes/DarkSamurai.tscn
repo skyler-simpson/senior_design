@@ -1,6 +1,7 @@
-[gd_scene load_steps=59 format=3 uid="uid://cyep4jp51tgi1"]
+[gd_scene load_steps=61 format=3 uid="uid://cyep4jp51tgi1"]
 
 [ext_resource type="Texture2D" uid="uid://dgnd6ukwfkv3d" path="res://Characters/Dark Samurai/DarkSamurai (64x64).png" id="1_jdu6q"]
+[ext_resource type="Script" uid="uid://pdx5yi0bik0w" path="res://Scenes/dark_samurai.gd" id="1_o0lna"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wqdgv"]
 atlas = ExtResource("1_jdu6q")
@@ -327,7 +328,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_dc6gv")
 }],
-"loop": true,
+"loop": false,
 "name": &"die",
 "speed": 5.0
 }, {
@@ -355,7 +356,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_kghje")
 }],
-"loop": true,
+"loop": false,
 "name": &"hit",
 "speed": 5.0
 }, {
@@ -443,15 +444,28 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jdu6q"]
 size = Vector2(76, 89)
 
-[node name="CharacterBody2D2" type="CharacterBody2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o0lna"]
+size = Vector2(86, 26)
+
+[node name="Samurai" type="CharacterBody2D" groups=["player"]]
+collision_layer = 2
+script = ExtResource("1_o0lna")
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(198.58264, 312.45035)
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")
-animation = &"die"
-frame_progress = 0.3219994
+animation = &"falling"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(202, 319)
+position = Vector2(4, 8)
 shape = SubResource("RectangleShape2D_jdu6q")
+
+[node name="SwordArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SwordArea"]
+position = Vector2(68, 9)
+shape = SubResource("RectangleShape2D_o0lna")
+
+[connection signal="body_entered" from="SwordArea" to="." method="_on_sword_area_body_entered"]
