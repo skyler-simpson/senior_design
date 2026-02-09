@@ -81,4 +81,4 @@ def character_in_4_directions():
         f.write(result.content)
     print("Sprite sheet saved as sprite_sheet.zip")
 
-character_in_4_directions()
+generate_static_sprite()
