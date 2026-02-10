@@ -22,3 +22,23 @@ Once the character is rendered, users will be able to play in the 2D minigame wi
 ![alt text](<src/Sprite Generation/generated-sprites/gemini_sprite_sheets/gemini_sprite_sheet_dbz.png>)
 
 ## FAQ
+
+### 1. How do I create my game character?
+Users will be able to enter their character description in a user prompt box. 
+### 2. What should I include in my prompt? 
+You should include various characteristics of what you want your game character to look like in your prompt. Be as descriptive as possble and include details such as clothing,abilities and overall theme. 
+### 3.What is an example of a good character prompt?
+A good prompt clearly describes the character’s appearance, style, and abilities in one or two sentences. For example:
+“A tall armored knight wearing silver plate armor with a red cape, carrying a large shield and glowing sword, pixel-art 8-bit style.”
+
+Including details such as clothing, colors, weapons, powers, or personality traits helps the system generate more accurate and visually consistent sprites.
+### 3. How long does the game generation process take? 
+The whole end-to-end sprite/game generation process should take between 2-3 minutes. 
+### 4. What can I do if my character doesn't look right? 
+If you are not happy with how your character looks you can generate a new character! Feel free to generate a new game character after you're done playing the game 
+### 5. Can I create multiple characters? 
+Unfortunately we only support one character per game at this point of time but you are able to create them as many times as you want. 
+### 6. What happens if the character generation fails? 
+If the character generation fails, check your internet connection and try again. Also try restarting the application if issues persist 
+### 7. Are there limits on prompt length? 
+Yes, extremely long prompts may be truncated. Keep descriptions concise but descriptive.
