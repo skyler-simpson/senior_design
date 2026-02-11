@@ -42,3 +42,7 @@ Unfortunately we only support one character per game at this point of time but y
 If the character generation fails, check your internet connection and try again. Also try restarting the application if issues persist 
 ### 7. Are there limits on prompt length? 
 Yes, extremely long prompts may be truncated. Keep descriptions concise but descriptive.
+### 8. How do I start the game?
+You need to run the control program in the terminal. To do this, navigate to the folder in your file exploere, open the folder in the terminal, and the type the command **python control.py** then press **ENTER** to play the game.
+### 9. How do I play the game?
+You horizontal movement is controlled by the **A** and **D**. You can jump by tapping the **SPACE** key. You have two attacks with **LEFT CLICK** and **RIGHT CLICK** (you must be on the ground to attack, unless you are throwing a projectile).
