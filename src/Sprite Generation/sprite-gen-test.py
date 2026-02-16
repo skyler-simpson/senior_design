@@ -8,6 +8,7 @@ headers = {
             "Authorization": f"Bearer {pixel_lab_api_key}",
             "Content-Type": "application/json"
           }
+print(pixel_lab_api_key)
 
 def generate_static_sprite():
 
@@ -26,7 +27,6 @@ def generate_static_sprite():
         description = desc1,
         image_size=dict(width=200, height=200),
         no_background=True,
-        
     )
     print(response.model_config)
     sprite = response.image.pil_image()
@@ -61,19 +61,19 @@ def character_in_4_directions():
 
     # Poll for job completion. Just checks status of job every 15 sec until it is complete (images created)
     # NOTE: (from gpt)
-    while True:
-        job = requests.get(f"{BASE_URL}/background-jobs/{background_job_id}", headers=headers).json()
-        status = job.get("status")
-        print("Job status:", status)
-        if status == "completed":
-            print("job.json(): ", job)
-            print(job.keys())
-            character_id = data["character_id"]
-            break
-        elif status == "failed":
-            print("Job failed:", job)
-            return
-        time.sleep(15)
+    # while True:
+    #     job = requests.get(f"{BASE_URL}/background-jobs/{background_job_id}", headers=headers).json()
+    #     status = job.get("status")
+    #     print("Job status:", status)
+    #     if status == "completed":
+    #         print("job.json(): ", job)
+    #         print(job.keys())
+    #         character_id = data["character_id"]
+    #         break
+    #     elif status == "failed":
+    #         print("Job failed:", job)
+    #         return
+    #     time.sleep(15)
 
     # images are stored in zip
     result = requests.get(f"{BASE_URL}/characters/{character_id}/zip", headers=headers)
@@ -81,4 +81,4 @@ def character_in_4_directions():
         f.write(result.content)
     print("Sprite sheet saved as sprite_sheet.zip")
 
-character_in_4_directions()
+generate_static_sprite()
