@@ -5,6 +5,8 @@ const SPEED = 300.0
 const JUMP_VELOCITY = -450.0
 const DAMAGE_AMOUNT = 20
 
+const TARGET_PIXEL_HEIGHT = 100.0
+
 @onready var samurai = $Sprite2D
 @onready var sword_area = $SwordArea
 
@@ -19,6 +21,8 @@ func _ready() -> void:
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
 	sword_area.monitoring = false
+	
+	scale_generated_sprite()
 
 func _physics_process(delta: float) -> void:
 	# If the player is dead then stop all movement
@@ -128,3 +132,25 @@ func die():
 	
 	get_tree().paused = true
 	print("Game Over - Engine Paused")
+
+func scale_generated_sprite():
+	var frame_height = 0.0
+	
+	# Scenario A: You are using an AnimatedSprite2D with SpriteFrames
+	if samurai is AnimatedSprite2D and samurai.sprite_frames:
+		var frame_texture = samurai.sprite_frames.get_frame_texture("idle", 0)
+		if frame_texture:
+			frame_height = float(frame_texture.get_height())
+			
+	# Scenario B: You are using a standard Sprite2D with a raw Texture
+	elif samurai is Sprite2D and samurai.texture:
+		# We divide the total height by vframes in case it's a grid sprite sheet
+		frame_height = float(samurai.texture.get_height()) / float(samurai.vframes)
+	
+	# Apply the scale if we successfully found the height
+	if frame_height > 0:
+		var scale_factor = TARGET_PIXEL_HEIGHT / frame_height
+		samurai.scale = Vector2(scale_factor, scale_factor)
+		print("Successfully scaled sprite to: ", samurai.scale)
+	else:
+		print("ERROR: Could not find texture to scale. Make sure the image is loaded first!")

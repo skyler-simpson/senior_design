@@ -1,7 +1,8 @@
-[gd_scene load_steps=61 format=3 uid="uid://cyep4jp51tgi1"]
+[gd_scene load_steps=59 format=3 uid="uid://cyep4jp51tgi1"]
 
 [ext_resource type="Texture2D" uid="uid://dgnd6ukwfkv3d" path="res://Characters/Dark Samurai/DarkSamurai (64x64).png" id="1_jdu6q"]
 [ext_resource type="Script" uid="uid://pdx5yi0bik0w" path="res://Scenes/dark_samurai.gd" id="1_o0lna"]
+[ext_resource type="Texture2D" uid="uid://drd6gb8qt6lub" path="res://Characters/TestingSprites/new_testing_sprite.png" id="3_e5m7y"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wqdgv"]
 atlas = ExtResource("1_jdu6q")
@@ -144,36 +145,24 @@ atlas = ExtResource("1_jdu6q")
 region = Rect2(64, 384, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wttr7"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(0, 0, 64, 64)
+atlas = ExtResource("3_e5m7y")
+region = Rect2(0, 0, 188, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_10uph"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(64, 0, 64, 64)
+atlas = ExtResource("3_e5m7y")
+region = Rect2(188, 0, 188, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_t1653"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(128, 0, 64, 64)
+atlas = ExtResource("3_e5m7y")
+region = Rect2(376, 0, 188, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n0j7k"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(192, 0, 64, 64)
+atlas = ExtResource("3_e5m7y")
+region = Rect2(564, 0, 188, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lwo53"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(256, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_g0cr0"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(320, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_t0khu"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(384, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_8iwpa"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(448, 0, 64, 64)
+atlas = ExtResource("3_e5m7y")
+region = Rect2(752, 0, 188, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qnffg"]
 atlas = ExtResource("1_jdu6q")
@@ -375,15 +364,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_lwo53")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_g0cr0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_t0khu")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_8iwpa")
 }],
 "loop": true,
 "name": &"idle",
@@ -405,11 +385,6 @@ animations = [{
 "loop": true,
 "name": &"jumping",
 "speed": 8.0
-}, {
-"frames": [],
-"loop": true,
-"name": &"new_animation",
-"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
