@@ -163,25 +163,33 @@ TRAINING_DATA = [
 
 # TRAINING FUNCTION
 
-def train_ner_model(output_path="./character_ner_model"):
+def train_ner_model(output_path="./character_ner_model", num_epochs=100):
     """
-    Train a spaCy NER model on character descriptions
+    Train a spaCy NER model with FIXED parameters
+    
+    Key changes:
+    - Increased epochs from 30 to 100 (helps loss converge)
+    - More frequent loss reporting (every 5 epochs)
+    - Better diagnostic output
     
     Args:
-        output_path: Where to save the trained model
+        output_path: Where to save model
+        num_epochs: Number of training epochs (100 for better convergence)
     """
     
-    print("=" * 60)
-    print("TRAINING CHARACTER NER MODEL")
-    print("=" * 60)
+    print("=" * 70)
+    print("TRAINING CHARACTER NER MODEL (FIXED VERSION)")
+    print("=" * 70)
     
     # Create blank English model
     print("\n1. Creating blank spaCy model...")
     nlp = spacy.blank("en")
+    print("   ✓ Created")
     
     # Add NER pipeline component
     print("2. Adding NER component...")
     ner = nlp.add_pipe("ner", last=True)
+    print("   ✓ Added")
     
     # Add labels
     print("3. Adding entity labels...")
@@ -189,28 +197,30 @@ def train_ner_model(output_path="./character_ner_model"):
               "CLOTHING", "EQUIPMENT", "SPECIAL_TRAIT"]
     for label in labels:
         ner.add_label(label)
+    print(f"   ✓ Added {len(labels)} labels")
     
     # Convert training data to spaCy format
-    print("4. Preparing training data...")
+    print(f"\n4. Preparing training data...")
     training_examples = []
     for text, annotations in TRAINING_DATA:
         example = Example.from_dict(nlp.make_doc(text), annotations)
         training_examples.append(example)
     
-    print(f"   Created {len(training_examples)} training examples")
+    print(f"   ✓ Created {len(training_examples)} training examples")
     
     # Initialize the NER component with examples
-    # This is critical - it tells spaCy what transitions are possible
-    print("4.5. Initializing NER component...")
+    print("5. Initializing NER component...")
     ner.initialize(lambda: training_examples)
+    print("   ✓ Initialized")
     
     # Training loop
-    print("5. Training model...")
+    print(f"\n6. Training model ({num_epochs} epochs)...")
+    print("   (Loss should DECREASE over time)")
+    print()
+    
     optimizer = nlp.create_optimizer()
     
-    # Train for multiple epochs
-    n_epochs = 30
-    for epoch in range(n_epochs):
+    for epoch in range(num_epochs):
         losses = {}
         
         # Shuffle data each epoch
@@ -224,21 +234,30 @@ def train_ner_model(output_path="./character_ner_model"):
             losses=losses
         )
         
-        if (epoch + 1) % 10 == 0:
-            print(f"   Epoch {epoch + 1}/{n_epochs} - Loss: {losses.get('ner', 0):.4f}")
+        # Show progress more frequently for debugging
+        if (epoch + 1) % 5 == 0:
+            loss_val = losses.get('ner', 0)
+            print(f"   Epoch {epoch + 1:3d}/{num_epochs} - Loss: {loss_val:8.4f}")
     
     # Save model
-    print(f"\n6. Saving model to {output_path}...")
+    print(f"\n7. Saving model to {output_path}...")
     nlp.to_disk(output_path)
     print("   ✓ Model saved!")
     
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print("TRAINING COMPLETE!")
-    print("=" * 60)
+    print("=" * 70)
+    print("\nWhat to expect:")
+    print("  - Loss should decrease from ~100+ down to ~5-20")
+    print("  - If loss doesn't decrease, there's a data problem")
+    print("  - 100 epochs takes longer but helps convergence")
+    print("\nNext step:")
+    print("  python character_ner_inference.py")
     
     return nlp
 
 
 if __name__ == "__main__":
-    model = train_ner_model()
-    print("\nYou can now use this model in character_ner_inference.py")
+    # Train with 100 epochs
+    model = train_ner_model(num_epochs=100)
+    print("\n✓ Ready to use with character_ner_inference.py")
