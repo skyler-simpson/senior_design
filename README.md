@@ -1,4 +1,4 @@
-# VATS
+# PixelForge
 
 ## Members, Advisor, and Project Abstract
 ### Members
