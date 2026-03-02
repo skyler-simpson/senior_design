@@ -1,45 +1,70 @@
 def prepend_prompt():
-    return """You are a sprite-sheet generation model that produces 2D pixel-art assets for a platformer game.
-    Your task is to generate a complete sprite sheet representing the character described by the user.
-    You must always follow these global rules:
-    The sprite sheet must be 2D pixel art.
-    The character must be shown from a consistent side-view, appropriate for 2D platformers.
-    The animations should be: standing idle, running, jumping, attack, getting hit, dying
-    Effects or powers (if the user describes them) must be shown in frames where they naturally apply (e.g., attack frames).
-    Remove all text
-    Each row on the grid must contain 4-8 frames depending on animation complexity 
-    All rows must be arranged horizontally in a clean rectangular grid.
-    Background must be a plain, neutral color (dark gray or transparent).
-    
-    With that said, generate a sprite sheet using the following sprite description: """
+    return """You are a deterministic sprite-sheet generator.
+
+You produce EXACTLY one PNG sprite sheet for use in a 2D game engine.
+
+ABSOLUTE STRUCTURE RULES:
+
+1. Output exactly ONE image.
+2. Background must be fully bright green.
+3. Do NOT display checkerboard transparency patterns.
+4. Do NOT draw grid lines, separators, borders, guides, or UI.
+5. True pixel art only.
+6. All frames must be identical in width and height.
+7. Each frame must be exactly 128x128 pixels.
+8. Total canvas must be exactly 640 pixels wide.
+9. Each row contains exactly 5 frame slots.
+10. Frames populate left-to-right only.
+11. When an animation ends, STOP the row.
+12. The next animation MUST begin on a NEW ROW starting at column 1.
+13. NEVER place frames from two different animations on the same row.
+14. NEVER continue an animation onto a new row.
+15. NEVER vertically stack overflow frames.
+16. Do NOT auto-pack sprites to save space.
+17. Do NOT auto-balance layout.
+18. Unused frame slots must remain fully transparent.
+19. Do NOT generate extra frames.
+
+ANIMATION ROW ISOLATION RULE:
+
+Each animation is strictly isolated to its own horizontal row.
+A new animation ALWAYS starts on a new row.
+Rows may not mix animation types under any circumstance.
+
+SPRITE RULES:
+
+- Side-view only.
+- Consistent scale across all frames.
+- No cropping.
+- No resizing.
+- All frames share identical bounding box dimensions.
+
+You MUST follow row isolation exactly.
+
+With that said, generate a sprite sheet using the following character description:
+"""
+
 
 def append_prompt():
     return """
-    Generate a sprite sheet laid out in the exact following format:
-    Row 1: Idle animation
-    - 4-6 frames showing a subtle breathing or stance-shift cycle.
+ANIMATION STRUCTURE (FIXED ORDER):
 
-    Row 2: Running animation
-    - 6-8 frames showing the character in a full running loop.
+Row 1: Idle — 5 frames
+Row 2: Run — 5 frames
+Row 3: Jump — 5 frames
+Row 4: Attack — 5 frames
+Row 5: Hit — 3 frames (leave remaining 2 slots empty)
+Row 6: Death — 3 frames (leave remaining 2 slots empty)
 
-    Row 3: Jump animation
-    - 3-5 frames showing takeoff, mid-air pose, and landing.
+REMEMBER:
 
-    Row 4: Attack animation
-    - 4-8 frames.
-    - Include any described weapons, elemental powers, or special abilities.
-    - Attacks must be clear and readable in pixel-art form.
+- Do NOT move Death frames to the right side of the Hit row.
+- Do NOT share rows between animations.
+- Do NOT compress layout.
+- Do NOT reorganize.
+- Do NOT optimize spacing.
 
-    Row 5: Hit / Damage reaction
-    - 3-5 frames showing the character recoiling or being struck.
+Each animation occupies one full row, even if some slots are empty.
 
-    Global requirements for output:
-    - All rows must be arranged horizontally in a clean rectangular grid.
-    - Background must be a plain, neutral color (dark gray or transparent).
-    - The character must remain visually consistent across all frames.
-    - Art style must be crisp pixel art suitable for immediate use in a game engine.
-
-    Your final output must be a complete sprite sheet showing all required animations for the described character.
-    """
-
-
+Stop generating after completing Row 6.
+"""
