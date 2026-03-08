@@ -18,11 +18,51 @@ var is_attacking: bool = false
 var is_hurt: bool = false
 
 func _ready() -> void:
+	var custom_skin_path = "user://custom_skin.png"
+	
+	if FileAccess.file_exists(custom_skin_path):
+		var custom_image = Image.new()
+		var err = custom_image.load(custom_skin_path)
+		
+		if err == OK:
+			var custom_texture = ImageTexture.create_from_image(custom_image)
+			# USE THE NEW FUNCTION HERE
+			apply_new_spritesheet(custom_texture)
+			print("Success: Loaded custom modded sprite sheet!")
+		else:
+			print("Error: Found custom_skin.png, but failed to load it. Code: ", err)
+			_load_default_sprite()
+	else:
+		_load_default_sprite()
+	
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
 	sword_area.monitoring = false
 	
 	scale_generated_sprite()
+
+func _load_default_sprite():
+	print("No custom skin found. Loading default wizard.")
+	var default_texture = load("res://Characters/TestingSprites/wizard.png")
+	# USE THE NEW FUNCTION HERE TOO
+	apply_new_spritesheet(default_texture)
+
+func apply_new_spritesheet(new_texture: Texture2D):
+	var frames = samurai.sprite_frames
+	if not frames:
+		print("Error: No SpriteFrames found on the AnimatedSprite2D!")
+		return
+		
+	# Loop through every animation (idle, running, attack1, etc.)
+	for anim_name in frames.get_animation_names():
+		# Loop through every frame in that animation
+		for i in range(frames.get_frame_count(anim_name)):
+			var frame_tex = frames.get_frame_texture(anim_name, i)
+			
+			# Ensure the frame is an AtlasTexture (extracted from a sprite sheet)
+			if frame_tex is AtlasTexture:
+				# Swap the base image!
+				frame_tex.atlas = new_texture
 
 func _physics_process(delta: float) -> void:
 	# If the player is dead then stop all movement
