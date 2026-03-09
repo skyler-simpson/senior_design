@@ -12,4 +12,14 @@ func _process(delta: float) -> void:
 
 
 func _on_button_pressed() -> void:
+	Global.generated_new_character = false
+	get_tree().change_scene_to_file("res://node_2d.tscn")
+
+
+func _on_generate_new_character_pressed() -> void:
+	print($TextEdit.text)
+	Global.generated_new_character = true
+	
+	# This is where we will call the scripts to generate
+	
 	get_tree().change_scene_to_file("res://node_2d.tscn")

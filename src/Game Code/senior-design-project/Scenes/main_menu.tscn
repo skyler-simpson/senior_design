@@ -91,3 +91,4 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_28flt")
 text = "Generate New Character"
 
 [connection signal="pressed" from="PlayCurrentCharacter" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="GenerateNewCharacter" to="." method="_on_generate_new_character_pressed"]

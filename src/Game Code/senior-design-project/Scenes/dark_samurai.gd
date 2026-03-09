@@ -20,20 +20,22 @@ var is_hurt: bool = false
 func _ready() -> void:
 	var custom_skin_path = "user://custom_skin.png"
 	
-	if FileAccess.file_exists(custom_skin_path):
-		var custom_image = Image.new()
-		var err = custom_image.load(custom_skin_path)
-		
-		if err == OK:
-			var custom_texture = ImageTexture.create_from_image(custom_image)
-			# USE THE NEW FUNCTION HERE
-			apply_new_spritesheet(custom_texture)
-			print("Success: Loaded custom modded sprite sheet!")
+	if Global.generated_new_character:
+		if FileAccess.file_exists(custom_skin_path):
+			var custom_image = Image.new()
+			var err = custom_image.load(custom_skin_path)
+			
+			if err == OK:
+				var custom_texture = ImageTexture.create_from_image(custom_image)
+				# USE THE NEW FUNCTION HERE
+				apply_new_spritesheet(custom_texture)
+				print("Success: Loaded custom modded sprite sheet!")
+			else:
+				print("Error: Found custom_skin.png, but failed to load it. Code: ", err)
+				_load_default_sprite()
 		else:
-			print("Error: Found custom_skin.png, but failed to load it. Code: ", err)
+			print("Could not load in new sprite.")
 			_load_default_sprite()
-	else:
-		_load_default_sprite()
 	
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
