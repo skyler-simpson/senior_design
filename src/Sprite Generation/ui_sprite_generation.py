@@ -37,7 +37,7 @@ def generate_sprite_sheet():
             elif part.inline_data is not None:
                 try:
                     image = part.as_image()
-                    image.save("src/Sprite Generation/generated-sprites/gemini_sprite_sheets/gemini_sprite_sheet.png")
+                    image.save("generated-sprites\gemini_sprite_sheets\gemini_sprite_sheet.png")
                 except Exception as e:
                     print(f"Error processing image: {e}")
     except Exception as e:

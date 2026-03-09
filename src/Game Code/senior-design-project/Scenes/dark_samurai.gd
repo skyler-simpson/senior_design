@@ -27,7 +27,6 @@ func _ready() -> void:
 			
 			if err == OK:
 				var custom_texture = ImageTexture.create_from_image(custom_image)
-				# USE THE NEW FUNCTION HERE
 				apply_new_spritesheet(custom_texture)
 				print("Success: Loaded custom modded sprite sheet!")
 			else:
@@ -36,6 +35,9 @@ func _ready() -> void:
 		else:
 			print("Could not load in new sprite.")
 			_load_default_sprite()
+	else:
+		# ADD THIS: If the player chose the normal play button, load the default!
+		_load_default_sprite()
 	
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
@@ -45,8 +47,8 @@ func _ready() -> void:
 
 func _load_default_sprite():
 	print("No custom skin found. Loading default wizard.")
+	# Because wizard.png is a native game asset, we can safely use load()
 	var default_texture = load("res://Characters/TestingSprites/wizard.png")
-	# USE THE NEW FUNCTION HERE TOO
 	apply_new_spritesheet(default_texture)
 
 func apply_new_spritesheet(new_texture: Texture2D):
