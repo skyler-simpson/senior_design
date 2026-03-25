@@ -10,7 +10,7 @@ from io import BytesIO
 
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
- 
+
 def generate_sprite_sheet(description, save_path):
     print(f"Generating character based on: {description}")
 
@@ -21,7 +21,7 @@ def generate_sprite_sheet(description, save_path):
 
     try:
         response = client.models.generate_content(
-            model="gemini-3-pro-image-preview",
+            model="gemini-3-pro-image-preview", 
             contents=[prompt],
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE"] 
@@ -33,29 +33,79 @@ def generate_sprite_sheet(description, save_path):
                 if part.inline_data is not None:
                     raw_image = Image.open(BytesIO(part.inline_data.data))
                     clean_image = raw_image.convert("RGBA")
+
+                    temp_path_before = r"C:\Users\thoma\OneDrive\Documents\Fall 2025\game_image_before.png"
+                    clean_image.save(temp_path_before, format="PNG")
+
+                    # --- UPDATED REFINEMENT LOGIC ---
+                    img_w, img_h = clean_image.size
+                    grid_cols, grid_rows = 5, 6
                     
-                    # --- THE NEW AUTO-CROP & RESIZE LOGIC ---
-                    orig_width, orig_height = clean_image.size
+                    # UPDATED: Increased to 192 for breathing room
+                    target_cell_size = 192 
                     
-                    # 1. Calculate the true width of the 5x6 grid
-                    frame_size = orig_height / 6
-                    grid_width = int(frame_size * 5)
+                    src_cell_w = img_w / grid_cols
+                    src_cell_h = img_h / grid_rows
                     
-                    # 2. Crop out the extra right-side background: (left, top, right, bottom)
-                    cropped_image = clean_image.crop((0, 0, grid_width, orig_height))
+                    # Create the larger final canvas
+                    final_sheet = Image.new("RGBA", (grid_cols * target_cell_size, grid_rows * target_cell_size), (0, 0, 0, 0))
+
+                    print(f"Original resolution: {img_w}x{img_h}. Processing frames at {target_cell_size}px...")
+
+                    for row in range(grid_rows):
+                        for col in range(grid_cols):
+                            # Calculate exact boundaries
+                            left = int(round(col * src_cell_w))
+                            top = int(round(row * src_cell_h))
+                            right = int(round((col + 1) * src_cell_w))
+                            bottom = int(round((row + 1) * src_cell_h))
+                            
+                            tile = clean_image.crop((left, top, right, bottom))
+                            
+                            # --- THE SHAVER: Delete 3px border to remove grid lines ---
+                            tw, th = tile.size
+                            if tw > 6 and th > 6: # Safety check
+                                tile = tile.crop((3, 3, tw - 3, th - 3))
+                            
+                            # Background Removal (Green Screen)
+                            datas = tile.getdata()
+                            new_data = []
+                            for r, g, b, a in datas:
+                                if g > r + 45 and g > b + 45: 
+                                    new_data.append((0, 0, 0, 0))
+                                else:
+                                    new_data.append((r, g, b, 255))
+                            tile.putdata(new_data)
+                            
+                            # Bounding Box Centering Logic
+                            bbox = tile.getbbox() 
+                            if bbox:
+                                # Ignore small noise
+                                if (bbox[2] - bbox[0] > 10) and (bbox[3] - bbox[1] > 10):
+                                    char_sprite = tile.crop(bbox)
+                                    cw, ch = char_sprite.size
+                                    
+                                    # CENTER in the new 192x192 box
+                                    dest_x = (col * target_cell_size) + (target_cell_size // 2) - (cw // 2)
+                                    dest_y = (row * target_cell_size) + (target_cell_size // 2) - (ch // 2)
+                                    
+                                    final_sheet.paste(char_sprite, (dest_x, dest_y), char_sprite)
+
+                    # Save results
+                    final_sheet.save(save_path, format="PNG")
+
+                    # OneDrive inspection path
+                    temp_path = r"C:\Users\thoma\OneDrive\Documents\Fall 2025\game_image_REFINED.png"
+                    os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+                    final_sheet.save(temp_path, format="PNG")
                     
-                    # 3. Resize the cleanly cropped grid to Godot's exact dimensions
-                    final_image = cropped_image.resize((640, 768), Image.NEAREST)
-                    
-                    # 4. Save it!
-                    final_image.save(save_path, format="PNG")
-                    print(f"Success! Game-ready image saved to: {save_path}")
+                    print(f"Success! {target_cell_size}px sprite sheet saved to: {save_path}")
                     
                 elif part.text is not None:
-                    print(f"API returned text instead of an image: {part.text}")
+                    print(f"API returned text: {part.text}")
                     
         except Exception as e:
-            print(f"Error processing and saving the image: {e}")
+            print(f"Error processing and saving: {e}")
                 
     except Exception as e:
         print(f"Error during API call: {e}")
@@ -66,4 +116,4 @@ if __name__ == "__main__":
         save_path = sys.argv[2] 
         generate_sprite_sheet(user_input, save_path)
     else:
-        print("Error: Missing arguments from Godot.")
+        print("Error: Missing arguments.")

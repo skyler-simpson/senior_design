@@ -48,25 +48,53 @@ func _ready() -> void:
 func _load_default_sprite():
 	print("No custom skin found. Loading default wizard.")
 	# Because wizard.png is a native game asset, we can safely use load()
-	var default_texture = load("res://Characters/TestingSprites/wizard.png")
+	var default_texture = load("res://Characters/TestingSprites/testing_192.png")
 	apply_new_spritesheet(default_texture)
 
 func apply_new_spritesheet(new_texture: Texture2D):
 	var frames = samurai.sprite_frames
 	if not frames:
-		print("Error: No SpriteFrames found on the AnimatedSprite2D!")
 		return
 		
-	# Loop through every animation (idle, running, attack1, etc.)
+	var new_cell_size = 192 
+	
 	for anim_name in frames.get_animation_names():
-		# Loop through every frame in that animation
+		# Find which row this animation should live on (0-5)
+		var row = _get_row_index_for_animation(anim_name)
+		
 		for i in range(frames.get_frame_count(anim_name)):
 			var frame_tex = frames.get_frame_texture(anim_name, i)
 			
-			# Ensure the frame is an AtlasTexture (extracted from a sprite sheet)
 			if frame_tex is AtlasTexture:
-				# Swap the base image!
-				frame_tex.atlas = new_texture
+				# CRITICAL: Make the resource unique so it doesn't 
+				# overwrite other animations sharing this frame index
+				var unique_frame = frame_tex.duplicate()
+				
+				# 1. Swap the image
+				unique_frame.atlas = new_texture
+				
+				# 2. Set the Region to the correct 192px "Bucket"
+				# Column = frame index, Row = determined by animation name
+				unique_frame.region = Rect2(
+					i * new_cell_size, 
+					row * new_cell_size, 
+					new_cell_size, 
+					new_cell_size
+				)
+				
+				# 3. Push the unique, corrected frame back into the SpriteFrames
+				frames.set_frame(anim_name, i, unique_frame)
+
+# This helper maps your Godot animation names to your Python Row logic
+func _get_row_index_for_animation(anim_name: String) -> int:
+	var n = anim_name.to_lower()
+	if "idle" in n: return 0
+	if "run" in n or "walk" in n: return 1
+	if "jump" in n: return 2
+	if "attack" in n: return 3
+	if "hit" in n or "hurt" in n: return 4
+	if "death" in n or "die" in n: return 5
+	return 0
 
 func _physics_process(delta: float) -> void:
 	# If the player is dead then stop all movement
