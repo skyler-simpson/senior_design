@@ -1752,9 +1752,6 @@ layer_0/tile_data = PackedInt32Array(2031615, 1245184, 25, 2097151, 1245184, 26,
 [node name="Samurai" parent="." instance=ExtResource("4_0hol4")]
 position = Vector2(92.20659, 413.36362)
 
-[node name="Enemy" parent="." instance=ExtResource("6_kdubu")]
-position = Vector2(870, 441)
-
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
@@ -1766,3 +1763,6 @@ offset_top = 1.0
 offset_right = 1152.0
 offset_bottom = 649.0
 texture = ExtResource("1_epypp")
+
+[node name="Enemy" parent="." instance=ExtResource("6_kdubu")]
+position = Vector2(870, 441)

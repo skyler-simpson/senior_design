@@ -5,6 +5,8 @@ const SPEED = 300.0
 const JUMP_VELOCITY = -450.0
 const DAMAGE_AMOUNT = 20
 
+const TARGET_PIXEL_HEIGHT = 100.0
+
 @onready var samurai = $Sprite2D
 @onready var sword_area = $SwordArea
 
@@ -16,9 +18,82 @@ var is_attacking: bool = false
 var is_hurt: bool = false
 
 func _ready() -> void:
+	var custom_skin_path = "res://Characters/TestingSprites/custom_skin.png"
+	
+	if Global.generated_new_character:
+		if FileAccess.file_exists(custom_skin_path):
+			var custom_image = Image.new()
+			var err = custom_image.load(custom_skin_path)
+			
+			if err == OK:
+				var custom_texture = ImageTexture.create_from_image(custom_image)
+				apply_new_spritesheet(custom_texture)
+				print("Success: Loaded custom modded sprite sheet!")
+			else:
+				print("Error: Found custom_skin.png, but failed to load it. Code: ", err)
+				_load_default_sprite()
+		else:
+			print("Could not load in new sprite.")
+			_load_default_sprite()
+	else:
+		# If there is no new sprite then load in the pre-existing one
+		_load_default_sprite()
+	
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
 	sword_area.monitoring = false
+	
+	scale_generated_sprite()
+
+func _load_default_sprite():
+	print("No custom skin found. Loading current sprite.")
+	var default_texture = load("res://Characters/TestingSprites/custom_skin.png")
+	apply_new_spritesheet(default_texture)
+
+func apply_new_spritesheet(new_texture: Texture2D):
+	var frames = samurai.sprite_frames
+	if not frames:
+		return
+		
+	var new_cell_size = 192 
+	
+	for anim_name in frames.get_animation_names():
+		# Find which row this animation should live on (0-5)
+		var row = _get_row_index_for_animation(anim_name)
+		
+		for i in range(frames.get_frame_count(anim_name)):
+			var frame_tex = frames.get_frame_texture(anim_name, i)
+			
+			if frame_tex is AtlasTexture:
+				# CRITICAL: Make the resource unique so it doesn't 
+				# overwrite other animations sharing this frame index
+				var unique_frame = frame_tex.duplicate()
+				
+				# 1. Swap the image
+				unique_frame.atlas = new_texture
+				
+				# 2. Set the Region to the correct 192px "Bucket"
+				# Column = frame index, Row = determined by animation name
+				unique_frame.region = Rect2(
+					i * new_cell_size, 
+					row * new_cell_size, 
+					new_cell_size, 
+					new_cell_size
+				)
+				
+				# 3. Push the unique, corrected frame back into the SpriteFrames
+				frames.set_frame(anim_name, i, unique_frame)
+
+# function to accurately get the animation on each row
+func _get_row_index_for_animation(anim_name: String) -> int:
+	var n = anim_name.to_lower()
+	if "idle" in n: return 0
+	if "run" in n or "walk" in n: return 1
+	if "jump" in n: return 2
+	if "attack" in n: return 3
+	if "hit" in n or "hurt" in n: return 4
+	if "death" in n or "die" in n: return 5
+	return 0
 
 func _physics_process(delta: float) -> void:
 	# If the player is dead then stop all movement
@@ -128,3 +203,25 @@ func die():
 	
 	get_tree().paused = true
 	print("Game Over - Engine Paused")
+
+func scale_generated_sprite():
+	var frame_height = 0.0
+	
+	# Scenario A: You are using an AnimatedSprite2D with SpriteFrames
+	if samurai is AnimatedSprite2D and samurai.sprite_frames:
+		var frame_texture = samurai.sprite_frames.get_frame_texture("idle", 0)
+		if frame_texture:
+			frame_height = float(frame_texture.get_height())
+			
+	# Scenario B: You are using a standard Sprite2D with a raw Texture
+	elif samurai is Sprite2D and samurai.texture:
+		# We divide the total height by vframes in case it's a grid sprite sheet
+		frame_height = float(samurai.texture.get_height()) / float(samurai.vframes)
+	
+	# Apply the scale if we successfully found the height
+	if frame_height > 0:
+		var scale_factor = TARGET_PIXEL_HEIGHT / frame_height
+		samurai.scale = Vector2(scale_factor, scale_factor)
+		print("Successfully scaled sprite to: ", samurai.scale)
+	else:
+		print("ERROR: Could not find texture to scale. Make sure the image is loaded first!")
