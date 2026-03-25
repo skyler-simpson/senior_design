@@ -23,7 +23,7 @@ func _on_generate_new_character_pressed() -> void:
 	
 	# Translate BOTH paths for the operating system
 	var script_path = ProjectSettings.globalize_path("res://generator.py")
-	var save_path = ProjectSettings.globalize_path("user://custom_skin.png")
+	var save_path = ProjectSettings.globalize_path("res://Characters/TestingSprites/custom_skin.png")
 	
 	# Pass the prompt AND the save path to Python
 	var arguments = [script_path, user_prompt, save_path]

@@ -34,14 +34,11 @@ def generate_sprite_sheet(description, save_path):
                     raw_image = Image.open(BytesIO(part.inline_data.data))
                     clean_image = raw_image.convert("RGBA")
 
-                    temp_path_before = r"C:\Users\thoma\OneDrive\Documents\Fall 2025\game_image_before.png"
-                    clean_image.save(temp_path_before, format="PNG")
-
-                    # --- UPDATED REFINEMENT LOGIC ---
+                    # Refining and resizing the image logic
                     img_w, img_h = clean_image.size
                     grid_cols, grid_rows = 5, 6
                     
-                    # UPDATED: Increased to 192 for breathing room
+                    # Increase the target cell size to 192x192 to ensure that it can get the full image
                     target_cell_size = 192 
                     
                     src_cell_w = img_w / grid_cols
@@ -62,7 +59,7 @@ def generate_sprite_sheet(description, save_path):
                             
                             tile = clean_image.crop((left, top, right, bottom))
                             
-                            # --- THE SHAVER: Delete 3px border to remove grid lines ---
+                            # If there is a border around the image then it needs to be deleted
                             tw, th = tile.size
                             if tw > 6 and th > 6: # Safety check
                                 tile = tile.crop((3, 3, tw - 3, th - 3))
@@ -85,7 +82,7 @@ def generate_sprite_sheet(description, save_path):
                                     char_sprite = tile.crop(bbox)
                                     cw, ch = char_sprite.size
                                     
-                                    # CENTER in the new 192x192 box
+                                    # CCenter the image in the target cell
                                     dest_x = (col * target_cell_size) + (target_cell_size // 2) - (cw // 2)
                                     dest_y = (row * target_cell_size) + (target_cell_size // 2) - (ch // 2)
                                     
@@ -93,11 +90,6 @@ def generate_sprite_sheet(description, save_path):
 
                     # Save results
                     final_sheet.save(save_path, format="PNG")
-
-                    # OneDrive inspection path
-                    temp_path = r"C:\Users\thoma\OneDrive\Documents\Fall 2025\game_image_REFINED.png"
-                    os.makedirs(os.path.dirname(temp_path), exist_ok=True)
-                    final_sheet.save(temp_path, format="PNG")
                     
                     print(f"Success! {target_cell_size}px sprite sheet saved to: {save_path}")
                     

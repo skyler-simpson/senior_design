@@ -18,7 +18,7 @@ var is_attacking: bool = false
 var is_hurt: bool = false
 
 func _ready() -> void:
-	var custom_skin_path = "user://custom_skin.png"
+	var custom_skin_path = "res://Characters/TestingSprites/custom_skin.png"
 	
 	if Global.generated_new_character:
 		if FileAccess.file_exists(custom_skin_path):
@@ -36,7 +36,7 @@ func _ready() -> void:
 			print("Could not load in new sprite.")
 			_load_default_sprite()
 	else:
-		# ADD THIS: If the player chose the normal play button, load the default!
+		# If there is no new sprite then load in the pre-existing one
 		_load_default_sprite()
 	
 	samurai.animation_finished.connect(_on_animation_finished)
@@ -46,9 +46,8 @@ func _ready() -> void:
 	scale_generated_sprite()
 
 func _load_default_sprite():
-	print("No custom skin found. Loading default wizard.")
-	# Because wizard.png is a native game asset, we can safely use load()
-	var default_texture = load("res://Characters/TestingSprites/testing_192.png")
+	print("No custom skin found. Loading current sprite.")
+	var default_texture = load("res://Characters/TestingSprites/custom_skin.png")
 	apply_new_spritesheet(default_texture)
 
 func apply_new_spritesheet(new_texture: Texture2D):
@@ -85,7 +84,7 @@ func apply_new_spritesheet(new_texture: Texture2D):
 				# 3. Push the unique, corrected frame back into the SpriteFrames
 				frames.set_frame(anim_name, i, unique_frame)
 
-# This helper maps your Godot animation names to your Python Row logic
+# function to accurately get the animation on each row
 func _get_row_index_for_animation(anim_name: String) -> int:
 	var n = anim_name.to_lower()
 	if "idle" in n: return 0
