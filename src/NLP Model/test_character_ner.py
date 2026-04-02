@@ -96,7 +96,8 @@ class TestIntegration(unittest.TestCase):
 
         from character_ner_inference import DEFAULT_MODEL_PATH, generate_json_response, load_model
 
-        cls._generate = generate_json_response
+        # staticmethod: plain functions on the class would otherwise bind `self` as the first arg.
+        cls._generate = staticmethod(generate_json_response)
         if not os.path.isdir(DEFAULT_MODEL_PATH):
             raise unittest.SkipTest("Trained model directory missing")
         cls._nlp = load_model(DEFAULT_MODEL_PATH)

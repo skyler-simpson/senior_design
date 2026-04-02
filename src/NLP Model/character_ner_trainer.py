@@ -28,7 +28,7 @@ NER_LABELS = [
 ]
 
 
-def train_ner_model(output_path="./character_ner_model", num_epochs=150):
+def train_ner_model(output_path="./character_ner_model", num_epochs=250):
     """
     Train a spaCy NER model.
 
@@ -102,5 +102,5 @@ def train_ner_model(output_path="./character_ner_model", num_epochs=150):
 
 
 if __name__ == "__main__":
-    model = train_ner_model(num_epochs=150)
+    model = train_ner_model(num_epochs=250)
     print("\n✓ Ready to use with character_ner_inference.py")
