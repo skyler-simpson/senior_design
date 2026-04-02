@@ -1,89 +1,225 @@
 """
 Character NER Inference Script
 
-Uses a trained spaCy NER model to extract character attributes from user input
-and calculate game statistics.
-
-The pipeline:
-1. Load trained model (created by character_ner_trainer.py)
-2. Extract attributes from text (HEIGHT, SPECIES, ELEMENT, etc.)
-3. Calculate game stats based on attributes
-4. Return JSON with everything
+Loads a trained spaCy NER model, extracts character attributes (including
+facial features, build, markings, armor details), supplements color detection,
+and computes SPEED, JUMP_VELOCITY, and DAMAGE_AMOUNT.
 
 Usage:
-    python character_ner_inference.py              # Demo mode (5 examples)
-    python character_ner_inference.py --interactive  # User input mode
+    python character_ner_inference.py              # Demo + self-tests
+    python character_ner_inference.py --interactive
+    python character_ner_inference.py --test       # Run test cases only
 """
 
-import spacy
+from __future__ import annotations
+
 import json
-from typing import Dict
+import os
+import re
+from typing import Any, Dict, List, Optional, Set, Tuple
 
-# PART 1: LOAD TRAINED MODEL
+# ---------------------------------------------------------------------------
+# Paths & thresholds
+# ---------------------------------------------------------------------------
 
-def load_model(model_path="./character_ner_model"):
-    """
-    Load the trained spaCy NER model from disk.
-    
-    This model was created by character_ner_trainer.py and contains
-    the learned weights for extracting character attributes.
-    
-    Args:
-        model_path: Path to the saved model directory
-        
-    Returns:
-        spacy.Language object (the trained model) or None if not found
-    """
+DEFAULT_MODEL_PATH = os.path.join(os.path.dirname(__file__), "character_ner_model")
+
+# Minimum confidence to keep an attribute (per coarse group)
+CONFIDENCE_THRESHOLDS = {
+    "single": 0.52,  # height, species, element
+    "list": 0.50,  # colors, clothing, equipment, traits, detail attrs
+}
+
+# Known color terms (lowercased) for validation & rule-based supplementation
+COLOR_LEXICON: Set[str] = {
+    "red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black",
+    "white", "gray", "grey", "gold", "golden", "silver", "bronze", "crimson",
+    "scarlet", "azure", "cerulean", "indigo", "violet", "magenta", "teal", "cyan",
+    "turquoise", "navy", "maroon", "beige", "cream", "ivory", "ebony", "jade",
+    "emerald", "ruby", "sapphire", "amber", "ochre", "copper", "chrome", "steel",
+    "blood", "wine", "plum", "lavender", "rose", "mint", "seafoam", "midnight",
+    "shadowy", "muted", "faded", "pale", "dark", "light", "bright", "dull",
+    "mahogany", "vermilion", "saffron", "charcoal", "bone", "rust", "rust-colored",
+    "steel-gray", "moss", "sun-bleached", "bone white", "blood red", "wine red",
+    "moss green", "midnight blue", "seafoam", "shadowy gray", "muted teal",
+}
+
+# Skip these as standalone token hits (often element/mood, not hue); phrases still match.
+_AMBIGUOUS_COLOR_TOKENS = frozenset({"dark", "light"})
+
+# Multi-word color phrases to scan before single tokens (longest first)
+COLOR_PHRASES = sorted(
+    [p for p in COLOR_LEXICON if " " in p] + [
+        "blood red", "bone white", "moss green", "midnight blue", "wine red",
+        "steel gray", "steel-grey", "muted teal", "shadowy gray", "sun-bleached",
+    ],
+    key=len,
+    reverse=True,
+)
+
+# Synonym normalization for attributes used in stats / display
+HEIGHT_SYNONYMS = {
+    "towering": "tall",
+    "colossal": "tall",
+    "massive": "tall",
+    "huge": "tall",
+    "large": "tall",
+    "giant": "tall",
+    "petite": "short",
+    "tiny": "short",
+    "minuscule": "short",
+    "diminutive": "short",
+    "small": "short",
+    "squat": "short",
+    "average": "average",
+    "middling": "average",
+}
+
+SPECIES_CLASS_BONUS = {
+    "knight": "warrior",
+    "warrior": "warrior",
+    "paladin": "warrior",
+    "berserker": "warrior",
+    "rogue": "rogue",
+    "assassin": "rogue",
+    "thief": "rogue",
+    "mage": "mage",
+    "wizard": "mage",
+    "necromancer": "mage",
+    "warlock": "mage",
+    "druid": "mage",
+    "sorcerer": "mage",
+    "archer": "rogue",
+    "ranger": "rogue",
+    "elf": "rogue",
+    "monk": "rogue",
+}
+
+
+def load_model(model_path: Optional[str] = None):
+    import spacy
+
+    path = model_path or DEFAULT_MODEL_PATH
     try:
-        nlp = spacy.load(model_path)
-        print(f"✓ Model loaded from {model_path}")
+        nlp = spacy.load(path)
+        print(f"✓ Model loaded from {path}")
         return nlp
     except OSError:
-        print(f"✗ Model not found at {model_path}")
-        print("Please run character_ner_trainer.py first to create the model!")
+        print(f"✗ Model not found at {path}")
+        print("Run character_ner_trainer.py first to create the model.")
         return None
 
 
-# PART 2: EXTRACT ATTRIBUTES FROM TEXT
+def _heuristic_entity_confidence(ent, text_lower: str, label: str) -> float:
+    """Approximate confidence when the NER pipe does not expose token scores."""
+    span = ent.text.lower().strip()
+    base = 0.74 + min(0.12, len(span) * 0.01)
+    if label in ("PRIMARY_COLOR", "SECONDARY_COLOR"):
+        if span in COLOR_LEXICON or any(p in text_lower for p in COLOR_PHRASES if p in ent.text.lower()):
+            base += 0.1
+    elif label in ("HEIGHT", "SPECIES", "ELEMENT"):
+        if len(span) >= 3:
+            base += 0.04
+    if ent.start > 0 and text_lower[ent.start_char - 1].isalpha():
+        base -= 0.06
+    return round(min(0.96, max(0.35, base)), 2)
 
-def extract_attributes(text: str, nlp) -> Dict:
-    """
-    Extract character attributes from user input using the trained model.
-    
-    The model identifies entities (like "tall", "wizard", "purple") and
-    labels them with their attribute type (HEIGHT, SPECIES, PRIMARY_COLOR).
-    
-    Args:
-        text: User's character description (e.g., "A tall wizard")
-        nlp: Trained spaCy model
-        
-    Returns:
-        Dictionary with extracted attributes:
-        {
-            "height": "tall",
-            "height_confidence": 0.94,
-            "species": "wizard",
-            "species_confidence": 0.91,
-            ... (and all other attributes)
-        }
-    """
-    
-    # RUN THE MODEL ON USER INPUT
-    # This is where spaCy reads the text and identifies entities
+
+def _normalize_height_token(t: str) -> str:
+    t = t.lower().strip()
+    return HEIGHT_SYNONYMS.get(t, t)
+
+
+def _species_class(species: Optional[str]) -> str:
+    if not species:
+        return "neutral"
+    s = species.lower()
+    for key, cls in SPECIES_CLASS_BONUS.items():
+        if key in s:
+            return cls
+    return "neutral"
+
+
+def _numeric_height_hint(text: str) -> Optional[str]:
+    """Infer rough height bucket from explicit measurements."""
+    tl = text.lower()
+    m = re.search(
+        r"\b(\d+)\s*(?:ft|foot|feet|')\s*(?:(\d+)\s*(?:in|inches|\"))?",
+        tl,
+    )
+    if m:
+        ft = int(m.group(1))
+        g2 = m.group(2)
+        inches = int(g2) if g2 else 0
+        total_in = ft * 12 + inches
+        if total_in >= 78:
+            return "tall"
+        if total_in <= 62:
+            return "short"
+        return "average"
+    if re.search(r"\b(six foot two|6\s*'?\s*2|seven feet|7\s*ft)\b", tl):
+        return "tall"
+    if re.search(r"\b(five foot nothing|under four feet|barely five)\b", tl):
+        return "short"
+    return None
+
+
+def _find_color_spans(text: str) -> List[Tuple[int, int, str]]:
+    """Rule-based color mentions (mid-sentence); returns (start, end, phrase)."""
+    lower = text.lower()
+    found: List[Tuple[int, int, str]] = []
+    covered = [False] * len(text)
+
+    def mark(s: int, e: int) -> bool:
+        if any(covered[s:e]):
+            return False
+        for i in range(s, e):
+            covered[i] = True
+        return True
+
+    for phrase in COLOR_PHRASES:
+        start = 0
+        while True:
+            idx = lower.find(phrase, start)
+            if idx < 0:
+                break
+            before = idx == 0 or not lower[idx - 1].isalnum()
+            after = idx + len(phrase) >= len(lower) or not lower[idx + len(phrase)].isalnum()
+            if before and after and mark(idx, idx + len(phrase)):
+                found.append((idx, idx + len(phrase), text[idx : idx + len(phrase)]))
+            start = idx + 1
+
+    tokens = re.finditer(r"[A-Za-z][A-Za-z\-']*", text)
+    for mo in tokens:
+        w = mo.group(0).lower()
+        if w in _AMBIGUOUS_COLOR_TOKENS:
+            continue
+        if w in COLOR_LEXICON and len(w) >= 3:
+            s, e = mo.start(), mo.end()
+            if not any(covered[s:e]) and mark(s, e):
+                found.append((s, e, mo.group(0)))
+    found.sort(key=lambda x: x[0])
+    return found
+
+
+def _already_spans(spans: List[Tuple[int, int]], start: int, end: int) -> bool:
+    for a, b in spans:
+        if start < b and end > a:
+            return True
+    return False
+
+
+def extract_attributes(text: str, nlp) -> Dict[str, Any]:
     doc = nlp(text)
-    
-    # INITIALIZE ATTRIBUTES DICTIONARY
-    # Set default values for all possible attributes
-    attributes = {
-        # Single-value attributes (only one of each)
+    text_lower = text.lower()
+
+    attributes: Dict[str, Any] = {
         "height": None,
         "height_confidence": 0.0,
         "species": None,
         "species_confidence": 0.0,
         "element": None,
         "element_confidence": 0.0,
-        
-        # Multi-value attributes (can have multiple)
         "primary_colors": [],
         "primary_colors_confidence": [],
         "secondary_colors": [],
@@ -93,314 +229,411 @@ def extract_attributes(text: str, nlp) -> Dict:
         "equipment": [],
         "equipment_confidence": [],
         "special_traits": [],
-        "special_traits_confidence": []
+        "special_traits_confidence": [],
+        "facial_features": [],
+        "facial_features_confidence": [],
+        "build": [],
+        "build_confidence": [],
+        "markings": [],
+        "markings_confidence": [],
+        "armor_details": [],
+        "armor_details_confidence": [],
     }
-    
-    # EXTRACT ENTITIES FOUND BY MODEL
-    # doc.ents contains all entities the model identified
-    for entity in doc.ents:
-        label = entity.label_        # Type of entity (e.g., "HEIGHT")
-        text_value = entity.text.lower()  # The actual word (e.g., "tall")
-        
-        # CONFIDENCE SCORE
-        # For MVP, use a random value in realistic range (0.82-0.96)
-        # TODO: Extract real confidence from spaCy's internal scores
-        import random
-        confidence = round(random.uniform(0.82, 0.96), 2)
-        
-        # STORE IN APPROPRIATE ATTRIBUTE
-        # Single-value attributes: store only the first match
-        if label == "HEIGHT":
-            if not attributes["height"]:  # Only if not already set
-                attributes["height"] = text_value
-                attributes["height_confidence"] = confidence
-                
-        elif label == "SPECIES":
-            if not attributes["species"]:
-                attributes["species"] = text_value
-                attributes["species_confidence"] = confidence
-                
-        elif label == "ELEMENT":
-            if not attributes["element"]:
-                attributes["element"] = text_value
-                attributes["element_confidence"] = confidence
-        
-        # Multi-value attributes: append to list
-        elif label == "PRIMARY_COLOR":
-            attributes["primary_colors"].append(text_value)
-            attributes["primary_colors_confidence"].append(confidence)
-            
-        elif label == "SECONDARY_COLOR":
-            attributes["secondary_colors"].append(text_value)
-            attributes["secondary_colors_confidence"].append(confidence)
-            
-        elif label == "CLOTHING":
-            attributes["clothing"].append(text_value)
-            attributes["clothing_confidence"].append(confidence)
-            
-        elif label == "EQUIPMENT":
-            attributes["equipment"].append(text_value)
-            attributes["equipment_confidence"].append(confidence)
-            
-        elif label == "SPECIAL_TRAIT":
-            attributes["special_traits"].append(text_value)
-            attributes["special_traits_confidence"].append(confidence)
-    
+
+    list_map = {
+        "PRIMARY_COLOR": ("primary_colors", "primary_colors_confidence"),
+        "SECONDARY_COLOR": ("secondary_colors", "secondary_colors_confidence"),
+        "CLOTHING": ("clothing", "clothing_confidence"),
+        "EQUIPMENT": ("equipment", "equipment_confidence"),
+        "SPECIAL_TRAIT": ("special_traits", "special_traits_confidence"),
+        "FACIAL_FEATURE": ("facial_features", "facial_features_confidence"),
+        "BUILD": ("build", "build_confidence"),
+        "MARKING": ("markings", "markings_confidence"),
+        "ARMOR_DETAIL": ("armor_details", "armor_details_confidence"),
+    }
+    single_map = {
+        "HEIGHT": ("height", "height_confidence"),
+        "SPECIES": ("species", "species_confidence"),
+        "ELEMENT": ("element", "element_confidence"),
+    }
+
+    ent_spans: List[Tuple[int, int]] = []
+
+    for ent in doc.ents:
+        label = ent.label_
+        conf = _heuristic_entity_confidence(ent, text_lower, label)
+        ent_spans.append((ent.start_char, ent.end_char))
+
+        if label in single_map:
+            vk, ck = single_map[label]
+            if not attributes[vk] or conf > attributes[ck]:
+                raw = ent.text.strip().lower()
+                attributes[vk] = raw
+                attributes[ck] = conf
+        elif label in list_map:
+            vk, ck = list_map[label]
+            val = ent.text.strip().lower()
+            attributes[vk].append(val)
+            attributes[ck].append(conf)
+
+    # Supplement colors from text (missed by NER in complex sentences)
+    existing_ranges = list(ent_spans)
+    for start, end, phrase in _find_color_spans(text):
+        if _already_spans(existing_ranges, start, end):
+            continue
+        pl = phrase.lower()
+        validated = pl in COLOR_LEXICON or any(
+            pl == p.lower() for p in COLOR_PHRASES if " " in p
+        )
+        if not validated and pl not in COLOR_LEXICON:
+            continue
+        conf = 0.82 if validated else 0.68
+        secondary_hint = any(
+            kw in text_lower[max(0, start - 30) : start + 40]
+            for kw in ("trim", "accent", "lining", "interior", "secondary", "stripe", "edges")
+        )
+        if secondary_hint:
+            attributes["secondary_colors"].append(pl)
+            attributes["secondary_colors_confidence"].append(conf)
+        else:
+            attributes["primary_colors"].append(pl)
+            attributes["primary_colors_confidence"].append(conf)
+        existing_ranges.append((start, end))
+
+    # Normalize height & merge numeric hints
+    if attributes["height"]:
+        attributes["height"] = _normalize_height_token(attributes["height"])
+    nh = _numeric_height_hint(text)
+    if nh and not attributes["height"]:
+        attributes["height"] = nh
+        attributes["height_confidence"] = max(attributes["height_confidence"], 0.7)
+
+    # Apply confidence thresholds & drop weak extractions
+    def filter_list(keys: Tuple[str, str], thresh: float) -> None:
+        vk, ck = keys
+        vals, cfs = [], []
+        for v, c in zip(attributes[vk], attributes[ck]):
+            if c >= thresh:
+                vals.append(v)
+                cfs.append(c)
+        attributes[vk] = vals
+        attributes[ck] = cfs
+
+    st = CONFIDENCE_THRESHOLDS["single"]
+    lt = CONFIDENCE_THRESHOLDS["list"]
+    for k in ("height_confidence", "species_confidence", "element_confidence"):
+        base = k.replace("_confidence", "")
+        if attributes[k] < st:
+            attributes[base] = None
+            attributes[k] = 0.0
+    for lm in list_map.values():
+        filter_list(lm, lt)
+
+    # Validate colors: must look like real colors
+    def is_valid_color(s: str) -> bool:
+        sl = s.lower()
+        if sl in COLOR_LEXICON:
+            return True
+        for part in re.split(r"[\s\-]+", sl):
+            if part and part in COLOR_LEXICON:
+                return True
+        return False
+
+    for col_key, cf_key in (
+        ("primary_colors", "primary_colors_confidence"),
+        ("secondary_colors", "secondary_colors_confidence"),
+    ):
+        nv, nc = [], []
+        for v, c in zip(attributes[col_key], attributes[cf_key]):
+            if is_valid_color(v):
+                nv.append(v)
+                nc.append(c)
+        attributes[col_key] = nv
+        attributes[cf_key] = nc
+
     return attributes
 
 
-# PART 3: CALCULATE GAME STATS FROM ATTRIBUTES
-
-def calculate_game_stats(attributes: Dict) -> Dict:
-    """
-    Convert extracted character attributes into game statistics.
-    
-    This implements game design logic that translates descriptive attributes
-    into gameplay mechanics that affect how the character plays.
-    
-    Args:
-        attributes: Extracted attributes dictionary
-        
-    Returns:
-        Dictionary with game stats:
-        {
-            "attack1_strength": 80,    # 0-100
-            "attack2_strength": 55,    # 0-100
-            "speed": 50,               # 20-100
-            "jump_height": 40          # 30-100
-        }
-    """
-    
-    stats = {}
-    
-    # ===== ATTACK1_STRENGTH (Primary Attack) =====
-    # How strong the character's main attack is
-    # Based on: equipment type + magical element
-    
-    attack1_strength = 50  # Base value everyone starts with
-    
-    # Bonus from physical weapons
-    equipment = attributes.get("equipment", [])
-    if any(w in ["sword", "axe", "mace"] for w in equipment):
-        attack1_strength += 20  # Heavy melee weapons are strong
-    if any(w in ["staff", "wand"] for w in equipment):
-        attack1_strength += 15  # Magical weapons are moderate
-    
-    # Bonus from having a magical element
-    element = attributes.get("element")
-    if element:
-        attack1_strength += 10  # Any element adds power
-    
-    # Modifier from character height
+def calculate_game_stats(attributes: Dict[str, Any]) -> Dict[str, int]:
+    """Compute SPEED, JUMP_VELOCITY (0–100), DAMAGE_AMOUNT (0–100)."""
     height = attributes.get("height")
-    if height in ["tall", "towering", "large", "massive", "huge"]:
-        attack1_strength += 5  # Taller = physically stronger
-    elif height in ["tiny", "short", "small", "petite", "diminutive"]:
-        attack1_strength -= 5  # Shorter = physically weaker
-    
-    # Cap at maximum (can't exceed 100)
-    stats["attack1_strength"] = min(100, attack1_strength)
-    
-    
-    # ===== ATTACK2_STRENGTH (Secondary Attack) =====
-    # How strong the character's secondary attack is
-    # Based on: magical traits + dual weapons
-    
-    attack2_strength = 40  # Base value (lower than attack1)
-    
-    # Bonus from magical traits
-    traits = attributes.get("special_traits", [])
-    if any(t in ["magical", "ethereal", "shimmering", "glowing"] for t in traits):
-        attack2_strength += 15  # Magical characters excel at secondary magic
-    if any(t in ["fierce", "noble", "demonic"] for t in traits):
-        attack2_strength += 10  # Strong personality boosts secondary attack
-    
-    # Big bonus from dual weapons
-    if len(equipment) >= 2:
-        attack2_strength += 20  # Dual wield is very effective
-    
-    # Cap at maximum
-    stats["attack2_strength"] = min(100, attack2_strength)
-    
-    
-    # ===== SPEED (Movement Speed) =====
-    # How fast the character moves
-    # Based on: height + traits + species class
-    
-    speed = 50  # Base value (middle of road)
-    
-    # Height affects speed
-    if height in ["tiny", "short", "small", "petite"]:
-        speed += 10  # Shorter = faster movement
-    elif height in ["towering", "tall", "massive", "huge", "large"]:
-        speed -= 10  # Taller = slower movement
-    
-    # Traits have big impact on speed
-    if any(t in ["fast", "swift", "agile"] for t in traits):
-        speed += 20  # Explicit speed traits boost a lot
-    if any(t in ["slow", "heavy", "bulky"] for t in traits):
-        speed -= 15  # Negative speed traits reduce a lot
-    
-    # Different character classes have different speeds
-    species = attributes.get("species")
-    if species in ["rogue", "assassin", "elf", "archer", "ranger"]:
-        speed += 10  # Agile classes are fast
-    elif species in ["paladin", "knight", "dwarf", "warrior"]:
-        speed -= 5  # Heavy armor classes are slower
-    
-    # Clamp speed between 20-100 (not too fast, not too slow)
-    stats["speed"] = max(20, min(100, speed))
-    
-    
-    # ===== JUMP_HEIGHT (Vertical Jump Ability) =====
-    # How high the character can jump
-    # Based on: height + species + ethereal traits
-    
-    jump_height = 50  # Base value (medium jump)
-    
-    # Height affects jump height
-    if height in ["tiny", "short", "small", "petite"]:
-        jump_height += 15  # Shorter characters jump higher relative to size
-    elif height in ["towering", "tall", "massive", "huge", "large"]:
-        jump_height -= 10  # Taller characters jump lower relative to size
-    
-    # Species affects jump ability
-    if species in ["elf", "archer", "ranger"]:
-        jump_height += 20  # These races are good jumpers
-    elif species in ["dwarf", "orc", "warrior"]:
-        jump_height -= 10  # Heavy classes don't jump well
-    
-    # Ethereal traits give massive jump boost
-    if any(t in ["ethereal", "floating", "levitating", "spectral"] for t in traits):
-        jump_height += 25  # Ethereal = basically flying
-    if any(t in ["heavy", "bulky", "earthbound"] for t in traits):
-        jump_height -= 10  # Grounded characters can't jump high
-    
-    # Clamp jump between 30-100 (minimum useful, maximum possible)
-    stats["jump_height"] = max(30, min(100, jump_height))
-    
-    
-    # Convert all stats to integers
-    return {k: int(v) for k, v in stats.items()}
+    species = (attributes.get("species") or "").lower()
+    element = (attributes.get("element") or "").lower()
+    traits = [t.lower() for t in attributes.get("special_traits") or []]
+    equipment = [e.lower() for e in attributes.get("equipment") or []]
+    clothing = [c.lower() for c in attributes.get("clothing") or []]
+    armor_d = [a.lower() for a in attributes.get("armor_details") or []]
+    combined_text = " ".join(traits + equipment + clothing + armor_d + [species])
 
-# PART 4: MAIN INFERENCE FUNCTION
+    cls = _species_class(species)
 
-def generate_json_response(input_text: str, nlp) -> Dict:
-    """
-    Main function: Takes user input and generates complete JSON response.
-    
-    Pipeline:
-    1. Extract attributes using trained NER model
-    2. Calculate game stats from attributes
-    3. Combine into final JSON response
-    
-    Args:
-        input_text: User's character description
-        nlp: Trained spaCy model
-        
-    Returns:
-        Complete JSON response with attributes and game stats
-    """
-    
-    # STEP 1: Extract attributes from text
+    # --- DAMAGE_AMOUNT ---
+    damage = 45
+    melee_hits = sum(
+        1
+        for w in equipment
+        if any(k in w for k in ("sword", "axe", "mace", "halberd", "spear", "lance", "dagger", "blade", "club", "hammer", "glaive", "bastard"))
+    )
+    magic_hits = sum(
+        1
+        for w in equipment
+        if any(k in w for k in ("staff", "wand", "orb", "tome", "rod", "crystal"))
+    )
+    hand_hits = sum(
+        1
+        for w in equipment
+        if any(k in w for k in ("fist", "gauntlet", "knuckle", "claw"))
+    )
+
+    if melee_hits:
+        damage += 28 + min(12, melee_hits * 4)
+    elif magic_hits:
+        damage += 18 + min(12, magic_hits * 5)
+    elif hand_hits:
+        damage += 8 + min(7, hand_hits * 3)
+    elif not equipment:
+        damage += 5
+
+    if element:
+        damage += 12
+
+    if any(t in combined_text for t in ("fierce", "powerful", "mighty", "brutal", "savage")):
+        damage += 14
+    if any(t in combined_text for t in ("timid", "cowardly", "weak", "frail")):
+        damage -= 8
+
+    if cls == "warrior":
+        damage += 5
+    elif cls == "rogue":
+        damage -= 5
+    elif cls == "mage":
+        damage -= 10
+
+    if height in ("tall", "towering", "massive"):
+        damage += 5
+    elif height in ("short", "tiny", "petite"):
+        damage -= 5
+
+    heavy_armor = any(
+        x in combined_text
+        for x in ("plate", "chainmail", "heavy", "reinforced", "greaves", "pauldron")
+    )
+    if heavy_armor:
+        damage += 4
+
+    damage = int(max(0, min(100, damage)))
+
+    # --- SPEED (nuanced) ---
+    speed = 52
+    if height in ("short", "tiny", "petite", "small", "diminutive"):
+        speed += 8
+    elif height in ("tall", "towering", "massive", "huge", "large"):
+        speed -= 7
+
+    for t in traits:
+        if any(k in t for k in ("fast", "swift", "agile", "quick", "sleek")):
+            speed += 16
+        if any(k in t for k in ("slow", "heavy", "bulky", "ponderous")):
+            speed -= 14
+
+    if cls == "rogue":
+        speed += 10
+    elif cls == "warrior":
+        speed -= 4
+    elif cls == "mage":
+        speed += 2
+
+    if heavy_armor:
+        speed -= 10
+    if "ethereal" in combined_text or "floating" in combined_text:
+        speed += 6
+
+    speed = int(max(5, min(100, speed)))
+
+    # --- JUMP_VELOCITY (ethereal, height, armor weight) ---
+    jv = 50
+    if height in ("short", "tiny", "petite"):
+        jv += 12
+    elif height in ("tall", "towering", "massive"):
+        jv -= 8
+
+    if any(s in species for s in ("elf", "ranger", "archer", "monk")):
+        jv += 14
+    if any(s in species for s in ("dwarf", "golem", "ogre", "orc")):
+        jv -= 10
+
+    if any(t in combined_text for t in ("ethereal", "floating", "levitat", "spectral", "wisp")):
+        jv += 22
+    if heavy_armor:
+        jv -= 14
+    if any(t in combined_text for t in ("heavy", "earthbound", "bulky")):
+        jv -= 8
+
+    jv = int(max(0, min(100, jv)))
+
+    return {
+        "speed": speed,
+        "jump_velocity": jv,
+        "damage_amount": damage,
+    }
+
+
+def validate_extraction_and_stats(
+    input_text: str,
+    attributes: Dict[str, Any],
+    game_stats: Dict[str, int],
+) -> Dict[str, Any]:
+    """Color checks, anti-hallucination notes, and stat coherence."""
+    issues: List[str] = []
+    hints: List[str] = []
+
+    text_l = input_text.lower()
+
+    # List attributes possibly not substantiated in text (hallucination risk)
+    for key in (
+        "primary_colors",
+        "secondary_colors",
+        "clothing",
+        "equipment",
+        "special_traits",
+        "facial_features",
+        "build",
+        "markings",
+        "armor_details",
+    ):
+        for item in attributes.get(key) or []:
+            if item and item.lower() not in text_l:
+                hints.append(f"Verify '{item}' appears in input (may be model inference).")
+
+    dmg = game_stats.get("damage_amount", 0)
+    spd = game_stats.get("speed", 0)
+    if dmg >= 85 and spd <= 28:
+        issues.append("Very high damage with very low speed — unusual but possible; review description.")
+
+    return {
+        "color_lexicon_hits": sum(
+            1 for c in (attributes.get("primary_colors") or []) + (attributes.get("secondary_colors") or []) if c.lower() in COLOR_LEXICON or any(p in c for p in (" ", "-"))
+        ),
+        "possible_unmentioned_attributes": hints[:12],
+        "stat_warnings": issues,
+    }
+
+
+def generate_json_response(input_text: str, nlp) -> Dict[str, Any]:
     attributes = extract_attributes(input_text, nlp)
-    
-    # STEP 2: Calculate game stats based on attributes
     game_stats = calculate_game_stats(attributes)
-    
-    # STEP 3: Merge attributes and game stats together
-    attributes.update(game_stats)
-    
-    # STEP 4: Build final response JSON
-    response = {
+    validation = validate_extraction_and_stats(input_text, attributes, game_stats)
+
+    return {
         "success": True,
         "input_text": input_text,
-        "attributes": attributes
+        "attributes": attributes,
+        "game_stats": game_stats,
+        "validation": {
+            **validation,
+            "confidence_thresholds": dict(CONFIDENCE_THRESHOLDS),
+        },
     }
-    
-    return response
 
-# PART 5: DEMO & INTERACTIVE MODES
 
-def demo(nlp):
-    """
-    Demo mode: Shows 5 pre-written character examples with outputs.
-    Useful for testing and showing the system works.
-    """
-    
+# ---------------------------------------------------------------------------
+# Tests (20+ prompts)
+# ---------------------------------------------------------------------------
+
+TEST_PROMPTS = [
+    "A tall ice wizard with purple robes and a glowing staff",
+    "A short fire dwarf carrying a golden axe",
+    "An average human with dark armor and a sword",
+    "A lightning mage in blue robes with a staff",
+    "The knight, seven feet tall, wore azure plate with gold trim",
+    "Between two oak trees, a figure in muted teal armor waited",
+    "Though scarred, the blade remained a dull bronze color",
+    "A petite rogue at five foot nothing, cloaked in shadowy gray",
+    "Massive earth golem with moss-covered shoulders and amber eyes",
+    "Slender water mage, melancholic, in seafoam robes and pearl rings",
+    "Veteran warrior, fierce and scarred, gripping a notched bastard sword",
+    "Sleek assassin in matte black gear with twin obsidian knives",
+    "Heavily armored knight, slow but unstoppable, with a steel longsword",
+    "Wind mage in flowing white robes holding an enchanted glaive",
+    "Cowardly goblin with a rusty knife and green skin",
+    "Ancient elf with silver hair, sharp ears, and tired violet eyes",
+    "A colossal giant with rust-colored stains on cream gloves",
+    "Shadow rogue with twin daggers and a cruel smile",
+    "Iron-willed paladin of the dawn in golden plate armor",
+    "Barely five feet tall with a quick temper and leather boots",
+    "Moss green vines wrapped steel-gray legs on a forest spirit",
+    "Ethereal scholar floating inches above cobblestones in indigo silk",
+]
+
+
+def run_self_tests(nlp) -> None:
+    print("\n" + "=" * 70)
+    print("SELF-TEST: sample prompts")
+    print("=" * 70)
+    ok = 0
+    for prompt in TEST_PROMPTS:
+        r = generate_json_response(prompt, nlp)
+        gs = r["game_stats"]
+        if all(0 <= gs[k] <= 100 for k in ("speed", "jump_velocity", "damage_amount")):
+            ok += 1
+        else:
+            print(f"FAIL bounds: {prompt!r} -> {gs}")
+    print(f"Passed range checks: {ok}/{len(TEST_PROMPTS)}")
+
+    # Color-focused checks
+    color_tests = [
+        ("Though scarred, the blade remained a dull bronze color", "bronze"),
+        ("His eyes, surprisingly violet, glowed softly", "violet"),
+        ("Stripes of white crossed the deep indigo tunic", "indigo"),
+    ]
+    for text, needle in color_tests:
+        r = generate_json_response(text, nlp)
+        cols = " ".join(r["attributes"].get("primary_colors") or [])
+        if needle not in cols:
+            print(f"Note: color '{needle}' may need review for: {text!r} -> {cols}")
+
+
+def demo(nlp) -> None:
     print("\n" + "=" * 70)
     print("CHARACTER NER INFERENCE - DEMO MODE")
     print("=" * 70)
-    
-    # Test cases covering different character types
-    test_inputs = [
-        "A tall ice wizard with purple robes and a glowing staff",
-        "A short fire dwarf with golden armor and an axe",
-        "An ethereal elf archer in green tunic with a bow",
-        "A dark vampire in black leather with crimson eyes",
-        "A fast rogue with twin daggers",
-    ]
-    
-    for i, test_input in enumerate(test_inputs, 1):
+    for i, test_input in enumerate(TEST_PROMPTS[:8], 1):
         print(f"\n\nEXAMPLE {i}:")
         print(f"Input: \"{test_input}\"")
         print("-" * 70)
-        
-        # Generate response
-        response = generate_json_response(test_input, nlp)
-        
-        # Pretty print JSON with indentation
-        print(json.dumps(response, indent=2))
+        print(json.dumps(generate_json_response(test_input, nlp), indent=2))
 
 
-def interactive_mode(nlp):
-    """
-    Interactive mode: User can type character descriptions and see results.
-    Useful for testing and demos.
-    """
-    
+def interactive_mode(nlp) -> None:
     print("\n" + "=" * 70)
     print("CHARACTER NER INFERENCE - INTERACTIVE MODE")
     print("=" * 70)
-    print("\nEnter character descriptions to extract attributes!")
-    print("Type 'quit' to exit\n")
-    
+    print("\nEnter descriptions (or 'quit').\n")
     while True:
         user_input = input("Enter character description: ").strip()
-        
-        if user_input.lower() == 'quit':
+        if user_input.lower() == "quit":
             print("Goodbye!")
             break
-        
         if not user_input:
-            print("Please enter a description!\n")
             continue
-        
-        # Generate response
-        response = generate_json_response(user_input, nlp)
-        
-        # Pretty print JSON
-        print("\nGenerated JSON:")
-        print(json.dumps(response, indent=2))
-        print()
+        print(json.dumps(generate_json_response(user_input, nlp), indent=2))
 
-# MAIN ENTRY POINT
 
 if __name__ == "__main__":
     import sys
-    
-    # Load the trained model
+
     nlp = load_model()
     if nlp is None:
         sys.exit(1)
-    
-    # Choose which mode to run based on command line argument
+
     if len(sys.argv) > 1:
         if sys.argv[1] == "--interactive":
             interactive_mode(nlp)
+        elif sys.argv[1] == "--test":
+            run_self_tests(nlp)
         else:
             print(f"Unknown argument: {sys.argv[1]}")
-            print("Usage: python character_ner_inference.py [--interactive]")
+            print("Usage: python character_ner_inference.py [--interactive|--test]")
     else:
-        # Default: run demo mode
         demo(nlp)
+        run_self_tests(nlp)
