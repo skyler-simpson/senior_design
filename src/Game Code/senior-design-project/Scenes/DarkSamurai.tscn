@@ -227,7 +227,7 @@ material = SubResource("ShaderMaterial_sh0fd")
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")
 animation = &"falling"
-frame_progress = 0.9002565
+frame_progress = 0.6891455
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(5, 8)
