@@ -72,6 +72,11 @@ func apply_new_spritesheet(new_texture: Texture2D):
 				# 1. Swap the image
 				unique_frame.atlas = new_texture
 				
+				# New code right here
+				var column_index = i
+				if anim_name.to_lower() == "falling":
+					column_index = i + 3
+				
 				# 2. Set the Region to the correct 192px "Bucket"
 				# Column = frame index, Row = determined by animation name
 				unique_frame.region = Rect2(
@@ -89,7 +94,7 @@ func _get_row_index_for_animation(anim_name: String) -> int:
 	var n = anim_name.to_lower()
 	if "idle" in n: return 0
 	if "run" in n or "walk" in n: return 1
-	if "jump" in n: return 2
+	if "jump" in n or "fall" in n: return 2
 	if "attack" in n: return 3
 	if "hit" in n or "hurt" in n: return 4
 	if "death" in n or "die" in n: return 5

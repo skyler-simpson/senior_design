@@ -1,6 +1,5 @@
-[gd_scene load_steps=36 format=3 uid="uid://cyep4jp51tgi1"]
+[gd_scene load_steps=31 format=3 uid="uid://cyep4jp51tgi1"]
 
-[ext_resource type="Texture2D" uid="uid://dgnd6ukwfkv3d" path="res://Characters/Dark Samurai/DarkSamurai (64x64).png" id="1_jdu6q"]
 [ext_resource type="Script" uid="uid://pdx5yi0bik0w" path="res://Scenes/dark_samurai.gd" id="1_o0lna"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sh0fd"]
@@ -26,22 +25,6 @@ region = Rect2(384, 384, 128, 128)
 [sub_resource type="AtlasTexture" id="AtlasTexture_ndt5e"]
 atlas = SubResource("CompressedTexture2D_e5m7y")
 region = Rect2(512, 384, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_wtyr8"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(0, 320, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_eqm2u"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(64, 320, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_q7ywu"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(128, 320, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_l68mu"]
-atlas = ExtResource("1_jdu6q")
-region = Rect2(192, 320, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pav62"]
 atlas = SubResource("CompressedTexture2D_e5m7y")
@@ -146,19 +129,7 @@ animations = [{
 "name": &"die",
 "speed": 5.0
 }, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_wtyr8")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_eqm2u")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_q7ywu")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_l68mu")
-}],
+"frames": [],
 "loop": true,
 "name": &"falling",
 "speed": 5.0
@@ -255,7 +226,8 @@ script = ExtResource("1_o0lna")
 material = SubResource("ShaderMaterial_sh0fd")
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")
-animation = &"attack1"
+animation = &"falling"
+frame_progress = 0.9002565
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(5, 8)
