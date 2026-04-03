@@ -36,3 +36,8 @@ func _on_generate_new_character_pressed() -> void:
 		print("Python Output: ", python_output[0])
 		
 	get_tree().change_scene_to_file("res://Scenes/preview_sprite.tscn")
+
+
+func _on_load_existing_sprite_pressed() -> void:
+	# Move to the load sprite scene
+	get_tree().change_scene_to_file("res://Scenes/load_sprite.tscn")

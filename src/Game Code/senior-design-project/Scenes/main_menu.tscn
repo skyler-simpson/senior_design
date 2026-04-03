@@ -47,6 +47,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_erv1k")
 text = "Play With Current Character"
 
 [node name="Label" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 423.5
 offset_top = 283.5
@@ -91,5 +92,32 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_28flt")
 text = "Generate New Character"
 
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 427.0
+offset_bottom = 52.0
+
+[node name="LoadExistingSprite" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -207.5
+offset_top = -212.0
+offset_right = 207.5
+offset_bottom = -156.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_erv1k")
+text = "Load Existing Character
+"
+
 [connection signal="pressed" from="PlayCurrentCharacter" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="GenerateNewCharacter" to="." method="_on_generate_new_character_pressed"]
+[connection signal="pressed" from="LoadExistingSprite" to="." method="_on_load_existing_sprite_pressed"]
