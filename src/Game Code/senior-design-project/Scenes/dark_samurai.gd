@@ -121,8 +121,6 @@ func _physics_process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("attack1") and is_on_floor() and not is_attacking:
 		start_attack("attack1")
-	elif Input.is_action_just_pressed("attack2") and is_on_floor() and not is_attacking:
-		start_attack("attack2")
 	
 	if not is_attacking:
 		if direction:
@@ -171,7 +169,7 @@ func _on_sword_area_body_entered(body):
 func _on_animation_finished() -> void:
 	var current_animation = samurai.animation
 	
-	if current_animation == "attack1" or current_animation == "attack2":
+	if current_animation == "attack1":
 		is_attacking = false
 		# Turn OFF the sword hitbox when attack ends
 		sword_area.monitoring = false
