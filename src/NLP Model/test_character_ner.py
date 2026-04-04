@@ -16,8 +16,8 @@ from character_ner_inference import (
 
 
 class TestTrainingData(unittest.TestCase):
-    def test_at_least_100_examples(self):
-        self.assertGreaterEqual(len(td.TRAINING_DATA), 100)
+    def test_at_least_200_examples(self):
+        self.assertGreaterEqual(len(td.TRAINING_DATA), 200)
 
     def test_validate_passes(self):
         td.validate_training_data()

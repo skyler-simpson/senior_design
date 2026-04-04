@@ -55,11 +55,95 @@ def _bulk_height_species() -> list:
         for s, sl in species[:4]:
             t = f"A {h} {s}"
             out.append(ex(t, (h, hl), (s, sl)))
-    for e, el in elements:
-        for s, sl in species[4:]:
-            article = "An " if e[0].lower() in "aeiou" else "A "
-            t = f"{article}{e} {s}".strip()
-            out.append(ex(t, (e, el), (s, sl)))
+    return out
+
+
+def _bulk_elements() -> list:
+    """Diverse element examples in many sentence patterns."""
+    out = []
+    # Core elements paired with various species
+    element_species = [
+        ("fire", "wizard"), ("fire", "knight"), ("fire", "druid"),
+        ("ice", "mage"), ("ice", "archer"), ("ice", "sorcerer"),
+        ("water", "priest"), ("water", "healer"), ("water", "shaman"),
+        ("earth", "golem"), ("earth", "berserker"), ("earth", "warden"),
+        ("air", "monk"), ("air", "dancer"), ("air", "nomad"),
+        ("lightning", "mage"), ("storm", "caller"), ("frost", "giant"),
+        ("shadow", "assassin"), ("void", "warlock"), ("light", "cleric"),
+        ("nature", "druid"), ("blood", "knight"), ("wind", "ranger"),
+        ("dark", "necromancer"), ("holy", "paladin"),
+    ]
+    for elem, spec in element_species:
+        article = "An " if elem[0].lower() in "aeiou" else "A "
+        t = f"{article}{elem} {spec}"
+        out.append(ex(t, (elem, "ELEMENT"), (spec, "SPECIES")))
+
+    # Elements embedded in natural descriptions
+    natural = [
+        ex("She wielded fire magic with a blazing sword",
+           ("fire", "ELEMENT"), ("blazing sword", "EQUIPMENT")),
+        ex("An ancient ice spirit guarded the frozen lake",
+           ("ice", "ELEMENT")),
+        ex("His water spells rippled across the surface",
+           ("water", "ELEMENT")),
+        ex("The earth shaman commanded roots from the soil",
+           ("earth", "ELEMENT")),
+        ex("An air monk leapt weightlessly between pillars",
+           ("air", "ELEMENT"), ("monk", "SPECIES")),
+        ex("Crimson fire erupted from the wizard's fingertips",
+           ("fire", "ELEMENT")),
+        ex("Her ice cold gaze froze everything in sight",
+           ("ice", "ELEMENT")),
+        ex("Water dripped from his soaked robes as he cast",
+           ("Water", "ELEMENT")),
+        ex("The earth trembled beneath the stone giant's steps",
+           ("earth", "ELEMENT")),
+        ex("Air currents swirled around the levitating sage",
+           ("Air", "ELEMENT")),
+        ex("A knight wreathed in flames charged forward",
+           ("flames", "ELEMENT")),
+        ex("Sheathed in frost, the warrior advanced silently",
+           ("frost", "ELEMENT")),
+        ex("Lightning crackled along the edges of her blade",
+           ("Lightning", "ELEMENT")),
+        ex("The storm-wrought sky answered to his call",
+           ("storm", "ELEMENT")),
+        ex("Wielding the power of nature, the druid healed all wounds",
+           ("nature", "ELEMENT")),
+        ex("Dark energy pulsed from the necromancer's staff",
+           ("Dark", "ELEMENT")),
+        ex("Holy light radiated from the paladin's shield",
+           ("Holy", "ELEMENT")),
+        ex("A shadowy figure cloaked in darkness appeared",
+           ("darkness", "ELEMENT")),
+        ex("His void-touched eyes glowed with an eerie light",
+           ("void", "ELEMENT")),
+        ex("A bolt of lightning shot from the stormcaller's hands",
+           ("lightning", "ELEMENT")),
+        ex("Wind whipped through her hair as she summoned a gale",
+           ("Wind", "ELEMENT")),
+        ex("The fire elemental burst from the volcano's heart",
+           ("fire", "ELEMENT")),
+        ex("Ice shards flew from her wand like deadly snowflakes",
+           ("Ice", "ELEMENT")),
+        ex("Waves of water energy surged around the tidal mage",
+           ("water", "ELEMENT")),
+        ex("Boulders of earth flew from his outstretched palms",
+           ("earth", "ELEMENT")),
+        ex("A gust of air knocked the goblin off his feet",
+           ("air", "ELEMENT")),
+        ex("An earth knight in granite armor stood immovable",
+           ("earth", "ELEMENT"), ("knight", "SPECIES")),
+        ex("A fire berserker raged through the battlefield",
+           ("fire", "ELEMENT"), ("berserker", "SPECIES")),
+        ex("An air dancer spun gracefully through the clouds",
+           ("air", "ELEMENT"), ("dancer", "SPECIES")),
+        ex("A water druid called forth the healing rain",
+           ("water", "ELEMENT"), ("druid", "SPECIES")),
+        ex("An ice sorcerer conjured a wall of frozen crystal",
+           ("ice", "ELEMENT"), ("sorcerer", "SPECIES")),
+    ]
+    out.extend(natural)
     return out
 
 
@@ -171,6 +255,87 @@ def _equipment_clothing() -> list:
             "Carrying a battered iron shield and a short spear",
             ("iron shield", "EQUIPMENT"),
             ("short spear", "EQUIPMENT"),
+        ),
+        # Additional varied equipment examples
+        ex(
+            "He drew a silver rapier from its scabbard",
+            ("silver rapier", "EQUIPMENT"),
+        ),
+        ex(
+            "A massive warhammer rested against the anvil",
+            ("warhammer", "EQUIPMENT"),
+        ),
+        ex(
+            "She nocked an arrow into her yew bow",
+            ("yew bow", "EQUIPMENT"),
+        ),
+        ex(
+            "Twin battleaxes hung at his belt",
+            ("Twin battleaxes", "EQUIPMENT"),
+        ),
+        ex(
+            "A crystal orb pulsed with arcane energy in her hand",
+            ("crystal orb", "EQUIPMENT"),
+        ),
+        ex(
+            "His tome of ancient spells fell open to a faded page",
+            ("tome", "EQUIPMENT"),
+        ),
+        ex(
+            "A heavy mace dangled from her gauntleted fist",
+            ("heavy mace", "EQUIPMENT"),
+        ),
+        ex(
+            "The crossbow was loaded and ready to fire",
+            ("crossbow", "EQUIPMENT"),
+        ),
+        ex(
+            "A jagged scimitar gleamed in the torchlight",
+            ("jagged scimitar", "EQUIPMENT"),
+        ),
+        ex(
+            "He gripped a frost-covered trident tightly",
+            ("frost-covered trident", "EQUIPMENT"),
+        ),
+        ex(
+            "A pair of throwing knives were strapped to her thigh",
+            ("throwing knives", "EQUIPMENT"),
+        ),
+        ex(
+            "The wizard's wand sparked with residual energy",
+            ("wand", "EQUIPMENT"),
+        ),
+        ex(
+            "A broadsword etched with runes lay on the altar",
+            ("broadsword", "EQUIPMENT"),
+        ),
+        ex(
+            "She carried a sling and a pouch of smooth stones",
+            ("sling", "EQUIPMENT"),
+        ),
+        ex(
+            "A flanged war pick hung from his belt",
+            ("war pick", "EQUIPMENT"),
+        ),
+        ex(
+            "His brass knuckles gleamed menacingly",
+            ("brass knuckles", "EQUIPMENT"),
+        ),
+        ex(
+            "A hooked chain spun lazily in his grip",
+            ("hooked chain", "EQUIPMENT"),
+        ),
+        ex(
+            "She held a sacred rod that glowed with divine light",
+            ("sacred rod", "EQUIPMENT"),
+        ),
+        ex(
+            "A pair of sickles hung from the assassin's back",
+            ("sickles", "EQUIPMENT"),
+        ),
+        ex(
+            "The paladin brandished a blessed morningstar",
+            ("morningstar", "EQUIPMENT"),
         ),
     ]
 
@@ -294,11 +459,53 @@ def _numeric_and_combined() -> list:
             ("elf", "SPECIES"),
             ("silver hair", "CLOTHING"),
         ),
+        ex(
+            "A fire knight wielding a blazing greatsword",
+            ("fire", "ELEMENT"),
+            ("knight", "SPECIES"),
+            ("blazing greatsword", "EQUIPMENT"),
+        ),
+        ex(
+            "An ice archer nocking a frost-tipped arrow",
+            ("ice", "ELEMENT"),
+            ("archer", "SPECIES"),
+            ("frost-tipped arrow", "EQUIPMENT"),
+        ),
+        ex(
+            "A water priestess holding a pearl-encrusted chalice",
+            ("water", "ELEMENT"),
+            ("priestess", "SPECIES"),
+            ("chalice", "EQUIPMENT"),
+        ),
+        ex(
+            "An earth warden gripping a stone-encruted maul",
+            ("earth", "ELEMENT"),
+            ("warden", "SPECIES"),
+            ("maul", "EQUIPMENT"),
+        ),
+        ex(
+            "An air nomad spinning a brass wind-staff",
+            ("air", "ELEMENT"),
+            ("nomad", "SPECIES"),
+            ("wind-staff", "EQUIPMENT"),
+        ),
+        ex(
+            "A lightning sorcerer channeling sparks through a crystal rod",
+            ("lightning", "ELEMENT"),
+            ("sorcerer", "SPECIES"),
+            ("crystal rod", "EQUIPMENT"),
+        ),
+        ex(
+            "A shadow assassin drawing twin obsidian blades",
+            ("shadow", "ELEMENT"),
+            ("assassin", "SPECIES"),
+            ("obsidian blades", "EQUIPMENT"),
+        ),
     ]
 
 
 def _more_variety() -> list:
-    """Additional examples to reach 100+ total."""
+    """Additional examples to reach 200+ total, heavy on elements and equipment."""
     samples = [
         ("A colossal giant", [("colossal", "HEIGHT")]),
         ("A minuscule sprite", [("minuscule", "HEIGHT")]),
@@ -340,6 +547,35 @@ def _more_variety() -> list:
         ("Heavily armored knight", [("armored knight", "SPECIES")]),
         ("Wind mage in flowing white robes", [("Wind", "ELEMENT"), ("mage", "SPECIES"), ("flowing white", "PRIMARY_COLOR"), ("robes", "CLOTHING")]),
         ("Shadow rogue with twin obsidian knives", [("Shadow", "ELEMENT"), ("rogue", "SPECIES"), ("obsidian knives", "EQUIPMENT")]),
+        # More element-heavy examples
+        ("A fire warrior swinging a flaming mace", [("fire", "ELEMENT"), ("warrior", "SPECIES"), ("flaming mace", "EQUIPMENT")]),
+        ("An ice knight brandishing a frozen blade", [("ice", "ELEMENT"), ("knight", "SPECIES"), ("frozen blade", "EQUIPMENT")]),
+        ("A water ranger with a coral-tipped spear", [("water", "ELEMENT"), ("ranger", "SPECIES"), ("coral-tipped spear", "EQUIPMENT")]),
+        ("An earth druid wielding a root-wrapped staff", [("earth", "ELEMENT"), ("druid", "SPECIES"), ("root-wrapped staff", "EQUIPMENT")]),
+        ("An air monk striking with wind-charged fists", [("air", "ELEMENT"), ("monk", "SPECIES")]),
+        ("A lightning wizard hurling bolts from a charged wand", [("lightning", "ELEMENT"), ("wizard", "SPECIES"), ("wand", "EQUIPMENT")]),
+        ("A frost mage conjuring an icy greatbow", [("frost", "ELEMENT"), ("mage", "SPECIES"), ("greatbow", "EQUIPMENT")]),
+        ("A storm priest calling thunder with a crackling scepter", [("storm", "ELEMENT"), ("priest", "SPECIES"), ("scepter", "EQUIPMENT")]),
+        ("A shadow warlock gripping a darkened scythe", [("shadow", "ELEMENT"), ("warlock", "SPECIES"), ("scythe", "EQUIPMENT")]),
+        ("A blood knight with a crimson-edged longsword", [("blood", "ELEMENT"), ("knight", "SPECIES"), ("longsword", "EQUIPMENT")]),
+        ("A nature shaman channeling vines through an oaken club", [("nature", "ELEMENT"), ("shaman", "SPECIES"), ("oaken club", "EQUIPMENT")]),
+        ("A fire archer loosing arrows wreathed in flame", [("fire", "ELEMENT"), ("archer", "SPECIES")]),
+        ("An earth golem pounding the ground with stone fists", [("earth", "ELEMENT"), ("golem", "SPECIES")]),
+        ("A water healer wielding a pearl-studded mace", [("water", "ELEMENT"), ("healer", "SPECIES"), ("pearl-studded mace", "EQUIPMENT")]),
+        ("A fire mage blasting foes with a fire-tipped staff", [("fire", "ELEMENT"), ("mage", "SPECIES"), ("fire-tipped staff", "EQUIPMENT")]),
+        ("An ice druid summoning frost from a frozen tome", [("ice", "ELEMENT"), ("druid", "SPECIES"), ("frozen tome", "EQUIPMENT")]),
+        ("A lightning knight striking with a sparking halberd", [("lightning", "ELEMENT"), ("knight", "SPECIES"), ("sparking halberd", "EQUIPMENT")]),
+        # More equipment variety
+        ("She drew a gleaming falchion from its sheath", [("falchion", "EQUIPMENT")]),
+        ("A dwarven axe was strapped to his back", [("dwarven axe", "EQUIPMENT")]),
+        ("The necromancer clutched a bone wand tightly", [("bone wand", "EQUIPMENT")]),
+        ("He swung a spiked flail in wide arcs", [("spiked flail", "EQUIPMENT")]),
+        ("Her twin katars flashed in the sun", [("twin katars", "EQUIPMENT")]),
+        ("A reinforced tower shield blocked the path", [("tower shield", "EQUIPMENT")]),
+        ("The ranger's longbow was strung and ready", [("longbow", "EQUIPMENT")]),
+        ("A silver-tipped crossbow hung across his chest", [("crossbow", "EQUIPMENT")]),
+        ("Gripping a runic warhorn, the warrior blew a blast", [("runic warhorn", "EQUIPMENT")]),
+        ("A jeweled scepter topped with a glowing orb", [("jeweled scepter", "EQUIPMENT")]),
     ]
     out = []
     for text, pairs in samples:
@@ -350,6 +586,7 @@ def _more_variety() -> list:
 def build_training_data() -> list:
     parts = [
         _bulk_height_species(),
+        _bulk_elements(),
         _bulk_colors_positions(),
         _equipment_clothing(),
         _numeric_and_combined(),
