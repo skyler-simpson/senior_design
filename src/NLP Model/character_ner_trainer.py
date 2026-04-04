@@ -20,11 +20,6 @@ NER_LABELS = [
     "SECONDARY_COLOR",
     "CLOTHING",
     "EQUIPMENT",
-    "SPECIAL_TRAIT",
-    "FACIAL_FEATURE",
-    "BUILD",
-    "MARKING",
-    "ARMOR_DETAIL",
 ]
 
 

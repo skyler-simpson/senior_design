@@ -137,7 +137,7 @@ def _bulk_colors_positions() -> list:
     ]
 
 
-def _equipment_clothing_traits() -> list:
+def _equipment_clothing() -> list:
     return [
         ex(
             "Wielding a chipped but legendary steel longsword",
@@ -172,122 +172,9 @@ def _equipment_clothing_traits() -> list:
             ("iron shield", "EQUIPMENT"),
             ("short spear", "EQUIPMENT"),
         ),
-        ex(
-            "Fierce eyes and a powerful stance",
-            ("Fierce", "SPECIAL_TRAIT"),
-            ("powerful", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Timid yet clever, the scholar seemed harmless",
-            ("Timid", "SPECIAL_TRAIT"),
-            ("clever", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Brooding and melancholic under the rain",
-            ("Brooding", "SPECIAL_TRAIT"),
-            ("melancholic", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Cheerful demeanor hid a ruthless streak",
-            ("Cheerful", "SPECIAL_TRAIT"),
-            ("ruthless", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Swift and silent as falling ash",
-            ("Swift", "SPECIAL_TRAIT"),
-            ("silent", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Noble bearing with an arrogant smirk",
-            ("Noble", "SPECIAL_TRAIT"),
-            ("arrogant", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Ethereal wisps trailed from her fingertips",
-            ("Ethereal", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Mighty thews strained the rope bridge",
-            ("Mighty", "SPECIAL_TRAIT"),
-        ),
     ]
 
 
-def _facial_build_markings_armor() -> list:
-    return [
-        ex(
-            "Sharp cheekbones and a narrow jaw",
-            ("Sharp cheekbones", "FACIAL_FEATURE"),
-            ("narrow jaw", "FACIAL_FEATURE"),
-        ),
-        ex(
-            "Deep-set eyes under heavy brows",
-            ("Deep-set eyes", "FACIAL_FEATURE"),
-            ("heavy brows", "FACIAL_FEATURE"),
-        ),
-        ex(
-            "A hooked nose and thin lips",
-            ("hooked nose", "FACIAL_FEATURE"),
-            ("thin lips", "FACIAL_FEATURE"),
-        ),
-        ex(
-            "Freckles scattered across a sunburned nose",
-            ("Freckles", "MARKING"),
-            ("sunburned nose", "FACIAL_FEATURE"),
-        ),
-        ex(
-            "Tribal tattoos spiraled down both arms",
-            ("Tribal tattoos", "MARKING"),
-        ),
-        ex(
-            "A jagged scar crossed the left cheek",
-            ("jagged scar", "MARKING"),
-        ),
-        ex(
-            "Birthmark shaped like a crescent moon on the neck",
-            ("Birthmark", "MARKING"),
-        ),
-        ex(
-            "Muscular build with wide shoulders",
-            ("Muscular build", "BUILD"),
-            ("wide shoulders", "BUILD"),
-        ),
-        ex(
-            "Slender frame and long limbs",
-            ("Slender frame", "BUILD"),
-            ("long limbs", "BUILD"),
-        ),
-        ex(
-            "Stocky dwarf legs and a barrel chest",
-            ("Stocky", "BUILD"),
-            ("barrel chest", "BUILD"),
-        ),
-        ex(
-            "Lithe and wiry, barely five feet",
-            ("Lithe", "BUILD"),
-            ("wiry", "BUILD"),
-        ),
-        ex(
-            "Ornate filigree etched into the breastplate",
-            ("filigree", "ARMOR_DETAIL"),
-            ("breastplate", "ARMOR_DETAIL"),
-        ),
-        ex(
-            "Spiked pauldrons with chainmail aventail",
-            ("Spiked pauldrons", "ARMOR_DETAIL"),
-            ("chainmail aventail", "ARMOR_DETAIL"),
-        ),
-        ex(
-            "Dented greaves and scratched vambraces",
-            ("greaves", "ARMOR_DETAIL"),
-            ("vambraces", "ARMOR_DETAIL"),
-        ),
-        ex(
-            "Gilded edges on otherwise plain plate armor",
-            ("Gilded edges", "ARMOR_DETAIL"),
-            ("plate armor", "ARMOR_DETAIL"),
-        ),
-    ]
 
 
 def _numeric_and_combined() -> list:
@@ -298,23 +185,12 @@ def _numeric_and_combined() -> list:
             ("battered plate", "CLOTHING"),
         ),
         ex(
-            "Barely five feet tall with a quick temper",
-            ("five feet tall", "HEIGHT"),
-            ("quick temper", "SPECIAL_TRAIT"),
-        ),
-        ex(
-            "Seven feet of scaled muscle and bad attitude",
-            ("Seven feet", "HEIGHT"),
-            ("scaled muscle", "BUILD"),
-        ),
-        ex(
             "A tall ice wizard with purple robes and a glowing staff",
             ("tall", "HEIGHT"),
             ("ice", "ELEMENT"),
             ("wizard", "SPECIES"),
             ("purple", "PRIMARY_COLOR"),
             ("robes", "CLOTHING"),
-            ("glowing", "SPECIAL_TRAIT"),
             ("staff", "EQUIPMENT"),
         ),
         ex(
@@ -349,7 +225,6 @@ def _numeric_and_combined() -> list:
         ),
         ex(
             "An ethereal elf archer with a bow",
-            ("ethereal", "SPECIAL_TRAIT"),
             ("elf archer", "SPECIES"),
             ("bow", "EQUIPMENT"),
         ),
@@ -364,21 +239,17 @@ def _numeric_and_combined() -> list:
         ex(
             "Tall noble knight with silver armor",
             ("Tall", "HEIGHT"),
-            ("noble", "SPECIAL_TRAIT"),
             ("knight", "SPECIES"),
             ("silver", "PRIMARY_COLOR"),
             ("armor", "CLOTHING"),
         ),
         ex(
             "A fast rogue with twin daggers",
-            ("fast", "SPECIAL_TRAIT"),
             ("rogue", "SPECIES"),
             ("twin daggers", "EQUIPMENT"),
         ),
         ex(
             "Slow heavy paladin in golden plate armor",
-            ("Slow", "SPECIAL_TRAIT"),
-            ("heavy", "SPECIAL_TRAIT"),
             ("paladin", "SPECIES"),
             ("golden", "PRIMARY_COLOR"),
             ("plate armor", "CLOTHING"),
@@ -403,32 +274,25 @@ def _numeric_and_combined() -> list:
             ("Massive", "HEIGHT"),
             ("earth", "ELEMENT"),
             ("golem", "SPECIES"),
-            ("moss-covered shoulders", "MARKING"),
             ("amber", "PRIMARY_COLOR"),
         ),
         ex(
             "Slender water mage, melancholic, in seafoam robes and pearl rings",
-            ("Slender", "BUILD"),
             ("water", "ELEMENT"),
             ("mage", "SPECIES"),
-            ("melancholic", "SPECIAL_TRAIT"),
             ("seafoam", "PRIMARY_COLOR"),
             ("robes", "CLOTHING"),
             ("pearl rings", "EQUIPMENT"),
         ),
         ex(
-            "Veteran warrior, fierce and scarred, gripping a notched bastard sword",
+            "Veteran warrior gripping a notched bastard sword",
             ("warrior", "SPECIES"),
-            ("fierce", "SPECIAL_TRAIT"),
-            ("scarred", "MARKING"),
             ("notched bastard sword", "EQUIPMENT"),
         ),
         ex(
-            "Ancient elf with silver hair, sharp ears, and tired violet eyes",
+            "Ancient elf with silver hair",
             ("elf", "SPECIES"),
-            ("silver hair", "FACIAL_FEATURE"),
-            ("sharp ears", "FACIAL_FEATURE"),
-            ("tired violet eyes", "FACIAL_FEATURE"),
+            ("silver hair", "CLOTHING"),
         ),
     ]
 
@@ -439,7 +303,7 @@ def _more_variety() -> list:
         ("A colossal giant", [("colossal", "HEIGHT")]),
         ("A minuscule sprite", [("minuscule", "HEIGHT")]),
         ("An imposing figure eight feet high", [("eight feet high", "HEIGHT")]),
-        ("Under four feet but deadly", [("Under four feet", "HEIGHT"), ("deadly", "SPECIAL_TRAIT")]),
+        ("Under four feet but deadly", [("Under four feet", "HEIGHT")]),
         ("A berserker", [("berserker", "SPECIES")]),
         ("A necromancer", [("necromancer", "SPECIES")]),
         ("A druid", [("druid", "SPECIES")]),
@@ -460,30 +324,21 @@ def _more_variety() -> list:
         ("Ragged burlap sack for a cape", [("Ragged burlap sack", "CLOTHING")]),
         ("Silk brocade vest with brass buttons", [("Silk brocade vest", "CLOTHING"), ("brass", "SECONDARY_COLOR")]),
         ("Wolfskin mantle trimmed in scarlet", [("Wolfskin mantle", "CLOTHING"), ("scarlet", "SECONDARY_COLOR")]),
-        ("Grim expression and cold gray eyes", [("Grim", "SPECIAL_TRAIT"), ("cold gray eyes", "FACIAL_FEATURE")]),
-        ("Jovial laugh and rosy cheeks", [("Jovial", "SPECIAL_TRAIT"), ("rosy cheeks", "FACIAL_FEATURE")]),
-        ("Stoic and unreadable face", [("Stoic", "SPECIAL_TRAIT")]),
-        ("Panicked eyes darting everywhere", [("Panicked", "SPECIAL_TRAIT")]),
-        ("Hunched posture and nervous hands", [("Hunched posture", "BUILD")]),
-        ("Athletic runner's legs", [("Athletic", "BUILD")]),
-        ("Piercing through fog, twin slits of yellow", [("twin slits of yellow", "FACIAL_FEATURE")]),
-        ("Wolf-like snout and fangs", [("Wolf-like snout", "FACIAL_FEATURE"), ("fangs", "FACIAL_FEATURE")]),
-        ("Oily feathers instead of hair", [("Oily feathers", "MARKING")]),
-        ("Runic brands burned into forearms", [("Runic brands", "MARKING")]),
-        ("Dragon scale patches along the spine", [("Dragon scale patches", "MARKING")]),
-        ("Reinforced gorget and articulated fingers", [("Reinforced gorget", "ARMOR_DETAIL"), ("articulated fingers", "ARMOR_DETAIL")]),
+        ("Hunched figure cloaked in shadows", [("cloaked", "CLOTHING")]),
+        ("Athletic runner in leather gear", [("leather gear", "CLOTHING")]),
+        ("Reinforced gorget and articulated gauntlets", [("Reinforced gorget", "CLOTHING"), ("articulated gauntlets", "CLOTHING")]),
         ("Cloaked in midnight blue with silver threading", [("midnight blue", "PRIMARY_COLOR"), ("silver", "SECONDARY_COLOR")]),
-        ("The armor, though dented, gleamed bronze in firelight", [("bronze", "PRIMARY_COLOR")]),
+        ("The armor, though dented, gleamed bronze in firelight", [("armor", "CLOTHING"), ("bronze", "PRIMARY_COLOR")]),
         ("Her lips were painted wine red for the duel", [("wine red", "PRIMARY_COLOR")]),
         ("He stood average height for a human", [("average height", "HEIGHT"), ("human", "SPECIES")]),
         ("Extremely tall for an elf", [("Extremely tall", "HEIGHT"), ("elf", "SPECIES")]),
         ("A squat halfling thief", [("squat", "HEIGHT"), ("halfling", "SPECIES"), ("thief", "SPECIES")]),
-        ("Iron-willed paladin of the dawn", [("Iron-willed", "SPECIAL_TRAIT"), ("paladin", "SPECIES")]),
-        ("Cowardly goblin with a rusty knife", [("Cowardly", "SPECIAL_TRAIT"), ("goblin", "SPECIES"), ("rusty knife", "EQUIPMENT")]),
-        ("Brutish ogre with a tree trunk club", [("Brutish", "SPECIAL_TRAIT"), ("ogre", "SPECIES"), ("tree trunk club", "EQUIPMENT")]),
-        ("Sleek assassin in matte black gear", [("Sleek", "SPECIAL_TRAIT"), ("assassin", "SPECIES"), ("matte black", "PRIMARY_COLOR")]),
-        ("Heavily armored knight, slow but unstoppable", [("Heavily armored", "ARMOR_DETAIL"), ("knight", "SPECIES"), ("slow", "SPECIAL_TRAIT")]),
-        ("Wind mage in flowing white robes", [("Wind", "ELEMENT"), ("mage", "SPECIES"), ("flowing white", "PRIMARY_COLOR")]),
+        ("Iron-willed paladin of the dawn", [("paladin", "SPECIES")]),
+        ("Cowardly goblin with a rusty knife", [("goblin", "SPECIES"), ("rusty knife", "EQUIPMENT")]),
+        ("Brutish ogre with a tree trunk club", [("ogre", "SPECIES"), ("tree trunk club", "EQUIPMENT")]),
+        ("Sleek assassin in matte black gear", [("assassin", "SPECIES"), ("matte black", "PRIMARY_COLOR"), ("gear", "CLOTHING")]),
+        ("Heavily armored knight", [("armored knight", "SPECIES")]),
+        ("Wind mage in flowing white robes", [("Wind", "ELEMENT"), ("mage", "SPECIES"), ("flowing white", "PRIMARY_COLOR"), ("robes", "CLOTHING")]),
         ("Shadow rogue with twin obsidian knives", [("Shadow", "ELEMENT"), ("rogue", "SPECIES"), ("obsidian knives", "EQUIPMENT")]),
     ]
     out = []
@@ -496,8 +351,7 @@ def build_training_data() -> list:
     parts = [
         _bulk_height_species(),
         _bulk_colors_positions(),
-        _equipment_clothing_traits(),
-        _facial_build_markings_armor(),
+        _equipment_clothing(),
         _numeric_and_combined(),
         _more_variety(),
     ]

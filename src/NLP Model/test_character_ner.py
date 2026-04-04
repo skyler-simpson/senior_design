@@ -35,11 +35,6 @@ class TestTrainingData(unittest.TestCase):
             "SECONDARY_COLOR",
             "CLOTHING",
             "EQUIPMENT",
-            "SPECIAL_TRAIT",
-            "FACIAL_FEATURE",
-            "BUILD",
-            "MARKING",
-            "ARMOR_DETAIL",
         ):
             self.assertIn(expected, labels)
 
@@ -50,12 +45,10 @@ class TestGameStats(unittest.TestCase):
             "height": "tall",
             "species": "knight",
             "element": "fire",
-            "special_traits": ["fierce"],
             "equipment": ["steel longsword"],
             "clothing": ["plate armor"],
-            "armor_details": ["greaves"],
         }
-        stats = calculate_game_stats(attrs)
+        stats = calculate_game_stats(attrs, "A tall fierce knight with a sword")
         for k in ("speed", "jump_velocity", "damage_amount"):
             self.assertIn(k, stats)
             self.assertGreaterEqual(stats[k], 0)
@@ -63,16 +56,29 @@ class TestGameStats(unittest.TestCase):
 
     def test_mage_damage_lower_than_warrior(self):
         warrior = calculate_game_stats(
-            {"species": "knight", "equipment": ["sword"], "height": "tall"}
+            {"species": "knight", "equipment": ["sword"], "height": "tall"},
+            "A tall knight with a sword",
         )
         mage = calculate_game_stats(
-            {"species": "mage", "equipment": ["wand"], "element": "fire", "height": "average"}
+            {"species": "mage", "equipment": ["wand"], "element": "fire", "height": "average"},
+            "A fire mage with a wand",
         )
         self.assertGreater(warrior["damage_amount"], mage["damage_amount"])
 
+    def test_trait_keywords_affect_stats(self):
+        fierce_stats = calculate_game_stats(
+            {"species": "warrior", "equipment": ["axe"]},
+            "A fierce and powerful warrior",
+        )
+        timid_stats = calculate_game_stats(
+            {"species": "warrior", "equipment": ["axe"]},
+            "A timid and weak warrior",
+        )
+        self.assertGreater(fierce_stats["damage_amount"], timid_stats["damage_amount"])
+
     def test_no_attack_keys(self):
         attrs = {"species": "rogue", "equipment": ["dagger"]}
-        stats = calculate_game_stats(attrs)
+        stats = calculate_game_stats(attrs, "A rogue with a dagger")
         self.assertNotIn("attack1_strength", stats)
         self.assertNotIn("attack2_strength", stats)
         self.assertNotIn("jump_height", stats)

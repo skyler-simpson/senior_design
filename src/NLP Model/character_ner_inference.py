@@ -228,16 +228,6 @@ def extract_attributes(text: str, nlp) -> Dict[str, Any]:
         "clothing_confidence": [],
         "equipment": [],
         "equipment_confidence": [],
-        "special_traits": [],
-        "special_traits_confidence": [],
-        "facial_features": [],
-        "facial_features_confidence": [],
-        "build": [],
-        "build_confidence": [],
-        "markings": [],
-        "markings_confidence": [],
-        "armor_details": [],
-        "armor_details_confidence": [],
     }
 
     list_map = {
@@ -245,11 +235,6 @@ def extract_attributes(text: str, nlp) -> Dict[str, Any]:
         "SECONDARY_COLOR": ("secondary_colors", "secondary_colors_confidence"),
         "CLOTHING": ("clothing", "clothing_confidence"),
         "EQUIPMENT": ("equipment", "equipment_confidence"),
-        "SPECIAL_TRAIT": ("special_traits", "special_traits_confidence"),
-        "FACIAL_FEATURE": ("facial_features", "facial_features_confidence"),
-        "BUILD": ("build", "build_confidence"),
-        "MARKING": ("markings", "markings_confidence"),
-        "ARMOR_DETAIL": ("armor_details", "armor_details_confidence"),
     }
     single_map = {
         "HEIGHT": ("height", "height_confidence"),
@@ -354,16 +339,18 @@ def extract_attributes(text: str, nlp) -> Dict[str, Any]:
     return attributes
 
 
-def calculate_game_stats(attributes: Dict[str, Any]) -> Dict[str, int]:
+def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Dict[str, int]:
     """Compute SPEED, JUMP_VELOCITY (0–100), DAMAGE_AMOUNT (0–100)."""
     height = attributes.get("height")
     species = (attributes.get("species") or "").lower()
     element = (attributes.get("element") or "").lower()
-    traits = [t.lower() for t in attributes.get("special_traits") or []]
     equipment = [e.lower() for e in attributes.get("equipment") or []]
     clothing = [c.lower() for c in attributes.get("clothing") or []]
-    armor_d = [a.lower() for a in attributes.get("armor_details") or []]
-    combined_text = " ".join(traits + equipment + clothing + armor_d + [species])
+    combined_text = " ".join(equipment + clothing + [species])
+    text_lower = input_text.lower()
+
+    def has(*words):
+        return any(w in text_lower for w in words)
 
     cls = _species_class(species)
 
@@ -397,9 +384,9 @@ def calculate_game_stats(attributes: Dict[str, Any]) -> Dict[str, int]:
     if element:
         damage += 12
 
-    if any(t in combined_text for t in ("fierce", "powerful", "mighty", "brutal", "savage")):
+    if has("fierce", "powerful", "mighty", "brutal", "savage"):
         damage += 14
-    if any(t in combined_text for t in ("timid", "cowardly", "weak", "frail")):
+    if has("timid", "cowardly", "weak", "frail"):
         damage -= 8
 
     if cls == "warrior":
@@ -430,11 +417,10 @@ def calculate_game_stats(attributes: Dict[str, Any]) -> Dict[str, int]:
     elif height in ("tall", "towering", "massive", "huge", "large"):
         speed -= 7
 
-    for t in traits:
-        if any(k in t for k in ("fast", "swift", "agile", "quick", "sleek")):
-            speed += 16
-        if any(k in t for k in ("slow", "heavy", "bulky", "ponderous")):
-            speed -= 14
+    if has("fast", "swift", "agile", "quick", "sleek"):
+        speed += 16
+    if has("slow", "bulky", "ponderous"):
+        speed -= 14
 
     if cls == "rogue":
         speed += 10
@@ -445,12 +431,12 @@ def calculate_game_stats(attributes: Dict[str, Any]) -> Dict[str, int]:
 
     if heavy_armor:
         speed -= 10
-    if "ethereal" in combined_text or "floating" in combined_text:
+    if has("ethereal", "floating"):
         speed += 6
 
     speed = int(max(5, min(100, speed)))
 
-    # --- JUMP_VELOCITY (ethereal, height, armor weight) ---
+    # --- JUMP_VELOCITY (height, armor weight) ---
     jv = 50
     if height in ("short", "tiny", "petite"):
         jv += 12
@@ -462,11 +448,11 @@ def calculate_game_stats(attributes: Dict[str, Any]) -> Dict[str, int]:
     if any(s in species for s in ("dwarf", "golem", "ogre", "orc")):
         jv -= 10
 
-    if any(t in combined_text for t in ("ethereal", "floating", "levitat", "spectral", "wisp")):
+    if has("ethereal", "floating", "levitat", "spectral", "wisp"):
         jv += 22
     if heavy_armor:
         jv -= 14
-    if any(t in combined_text for t in ("heavy", "earthbound", "bulky")):
+    if has("heavy", "earthbound", "bulky"):
         jv -= 8
 
     jv = int(max(0, min(100, jv)))
@@ -495,11 +481,6 @@ def validate_extraction_and_stats(
         "secondary_colors",
         "clothing",
         "equipment",
-        "special_traits",
-        "facial_features",
-        "build",
-        "markings",
-        "armor_details",
     ):
         for item in attributes.get(key) or []:
             if item and item.lower() not in text_l:
@@ -521,7 +502,7 @@ def validate_extraction_and_stats(
 
 def generate_json_response(input_text: str, nlp) -> Dict[str, Any]:
     attributes = extract_attributes(input_text, nlp)
-    game_stats = calculate_game_stats(attributes)
+    game_stats = calculate_game_stats(attributes, input_text)
     validation = validate_extraction_and_stats(input_text, attributes, game_stats)
 
     return {
