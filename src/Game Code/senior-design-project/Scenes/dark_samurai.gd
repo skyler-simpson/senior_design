@@ -18,12 +18,18 @@ var is_attacking: bool = false
 var is_hurt: bool = false
 
 func _ready() -> void:
-	var custom_skin_path = "res://Characters/TestingSprites/custom_skin.png"
+	var path_to_load = ""
+	
+	if Global.custom_skin_path != "":
+		path_to_load = Global.custom_skin_path
+	else:
+		path_to_load = "res://Characters/TestingSprites/custom_skin.png"
+	
 	
 	if Global.generated_new_character:
-		if FileAccess.file_exists(custom_skin_path):
+		if FileAccess.file_exists(path_to_load):
 			var custom_image = Image.new()
-			var err = custom_image.load(custom_skin_path)
+			var err = custom_image.load(path_to_load)
 			
 			if err == OK:
 				var custom_texture = ImageTexture.create_from_image(custom_image)
