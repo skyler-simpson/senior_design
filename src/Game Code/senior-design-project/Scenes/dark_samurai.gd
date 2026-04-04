@@ -61,7 +61,7 @@ func apply_new_spritesheet(new_texture: Texture2D):
 	if not frames:
 		return
 		
-	var new_cell_size = 192 
+	var new_cell_size = 192
 	
 	for anim_name in frames.get_animation_names():
 		# Find which row this animation should live on (0-5)

@@ -35,10 +35,12 @@ def generate_sprite_sheet(description, save_path):
             for part in response.parts:
                 if part.inline_data is not None:
                     raw_image = Image.open(BytesIO(part.inline_data.data))
+
+                    raw_image.save(r"C:\Users\thoma\OneDrive\Documents\Fall 2025\Old Generated images\Good Images\raw_image.jpg", format="JPEG")
                     clean_image = raw_image.convert("RGBA")
 
                     # This line is for testing and should be left commented out for now
-                    #clean_image.save(r"C:\Users\thoma\OneDrive\Documents\Fall 2025\Old Generated images\Good Images\before_image.png", format="PNG")
+                    clean_image.save(r"C:\Users\thoma\OneDrive\Documents\Fall 2025\Old Generated images\Good Images\before_image.png", format="PNG")
 
                     # Refining and resizing the image logic
                     img_w, img_h = clean_image.size
