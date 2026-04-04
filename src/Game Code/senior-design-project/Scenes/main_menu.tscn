@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://nuu2y8ts2gw6"]
+[gd_scene load_steps=5 format=3 uid="uid://nuu2y8ts2gw6"]
 
 [ext_resource type="Script" uid="uid://beny45prvy761" path="res://Scenes/main_menu.gd" id="1_28flt"]
+[ext_resource type="Texture2D" uid="uid://cs6g2htvglyx0" path="res://Dungeon Backdrop.jpg" id="2_48xlc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_erv1k"]
 bg_color = Color(1, 1, 1, 1)
@@ -25,6 +26,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_28flt")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1151.0
+offset_bottom = 649.0
+texture = ExtResource("2_48xlc")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="PlayCurrentCharacter" type="Button" parent="."]
 layout_mode = 1
