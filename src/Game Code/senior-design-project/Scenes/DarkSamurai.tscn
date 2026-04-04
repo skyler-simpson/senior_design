@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://cyep4jp51tgi1"]
+[gd_scene load_steps=30 format=3 uid="uid://cyep4jp51tgi1"]
 
 [ext_resource type="Script" uid="uid://pdx5yi0bik0w" path="res://Scenes/dark_samurai.gd" id="1_o0lna"]
 
@@ -97,10 +97,6 @@ region = Rect2(256, 128, 128, 128)
 [sub_resource type="AtlasTexture" id="AtlasTexture_v5n7y"]
 atlas = SubResource("CompressedTexture2D_e5m7y")
 region = Rect2(384, 128, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xlvcm"]
-atlas = SubResource("CompressedTexture2D_e5m7y")
-region = Rect2(512, 128, 128, 128)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_wtyr8"]
 animations = [{
@@ -203,9 +199,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_v5n7y")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_xlvcm")
 }],
 "loop": true,
 "name": &"running",
@@ -226,8 +219,7 @@ script = ExtResource("1_o0lna")
 material = SubResource("ShaderMaterial_sh0fd")
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")
-animation = &"falling"
-frame_progress = 0.6891455
+animation = &"running"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(5, 8)
