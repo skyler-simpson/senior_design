@@ -3,14 +3,14 @@ def prepend_prompt():
     Your task is to generate a complete sprite sheet representing the character described by the user.
     You must always follow these global rules:
     The sprite sheet must be 2D pixel art.
+    Remove all text
     The character must be shown from a consistent side-view, appropriate for 2D platformers.
     The animations should be: standing idle, running, jumping, attack, getting hit, dying
     Effects or powers (if the user describes them) must be shown in frames where they naturally apply (e.g., attack frames).
-    Remove all text
     Each row on the grid must contain 4-8 frames depending on animation complexity 
     All rows must be arranged horizontally in a clean rectangular grid.
     Background must be a plain, neutral color (dark gray or transparent).
-    
+    The sprite sheet must be aligned to the left and not be centered. 
     With that said, generate a sprite sheet using the following sprite description: """
 
 def append_prompt():
