@@ -5,7 +5,8 @@ extends CanvasLayer
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	# Allows this node to ignore the pause state
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -18,4 +19,3 @@ func show_end_screen(won: bool):
 	title_label.text = "YOU WIN" if won else "YOU LOSE"
 	subtitle_label.text = "PRESS ENTER TO RETURN TO MENU"
 	visible = true
-	#get_tree().paused = true
