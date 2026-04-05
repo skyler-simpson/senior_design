@@ -37,4 +37,6 @@ func _on_menu_button_pressed() -> void:
 
 
 func _on_load_button_pressed() -> void:
+	var path = "res://Characters/TestingSprites/Old Characters"
+	file_dialog.current_dir = path
 	file_dialog.popup_centered()
