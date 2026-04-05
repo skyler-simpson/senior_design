@@ -12,7 +12,7 @@ const TARGET_PIXEL_HEIGHT = 100.0
 @onready var health_bar = $HealthBar
 
 var max_health: int = 100
-var current_health: int = 100
+var current_health: int = 20
 var is_dead: bool = false
 
 var is_attacking: bool = false
@@ -217,8 +217,17 @@ func take_damage(amount: int):
 		samurai.play("hit")
 
 func die():
+	# Prevent function from calling multiple times
+	if is_dead: return
+	
 	is_dead = true
-	velocity.x = 0
+	set_physics_process(false)
+	
+	is_attacking = false
+	is_hurt = false
+	velocity = Vector2.ZERO
+	
+	samurai.stop()
 	samurai.play("die")
 	
 	await samurai.animation_finished

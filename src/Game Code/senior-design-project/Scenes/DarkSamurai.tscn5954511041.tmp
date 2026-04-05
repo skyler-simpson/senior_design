@@ -1,8 +1,6 @@
-[gd_scene load_steps=38 format=3 uid="uid://cyep4jp51tgi1"]
+[gd_scene load_steps=32 format=3 uid="uid://cyep4jp51tgi1"]
 
 [ext_resource type="Script" uid="uid://pdx5yi0bik0w" path="res://Scenes/dark_samurai.gd" id="1_o0lna"]
-[ext_resource type="Texture2D" uid="uid://cfpdxjb5q5xf7" path="res://Characters/TestingSprites/Old Characters/custome_skin_backup_20260403200928.png" id="2_o0lna"]
-[ext_resource type="Texture2D" uid="uid://c1tdbw3a835qf" path="res://Characters/TestingSprites/superman_test.png" id="3_e5m7y"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sh0fd"]
 
@@ -27,22 +25,6 @@ region = Rect2(384, 384, 128, 128)
 [sub_resource type="AtlasTexture" id="AtlasTexture_ndt5e"]
 atlas = SubResource("CompressedTexture2D_e5m7y")
 region = Rect2(512, 384, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_e5m7y"]
-atlas = ExtResource("2_o0lna")
-region = Rect2(0, 960, 192, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ry6i8"]
-atlas = ExtResource("2_o0lna")
-region = Rect2(192, 960, 192, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_sh0fd"]
-atlas = ExtResource("2_o0lna")
-region = Rect2(384, 960, 192, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_p18k1"]
-atlas = ExtResource("3_e5m7y")
-region = Rect2(576, 384, 192, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pav62"]
 atlas = SubResource("CompressedTexture2D_e5m7y")
@@ -138,24 +120,12 @@ animations = [{
 "name": &"attack1",
 "speed": 5.0
 }, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_e5m7y")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ry6i8")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_sh0fd")
-}],
+"frames": [],
 "loop": false,
 "name": &"die",
 "speed": 5.0
 }, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_p18k1")
-}],
+"frames": [],
 "loop": true,
 "name": &"falling",
 "speed": 5.0
@@ -255,7 +225,7 @@ script = ExtResource("1_o0lna")
 material = SubResource("ShaderMaterial_sh0fd")
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")
-animation = &"falling"
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(5, 8)
