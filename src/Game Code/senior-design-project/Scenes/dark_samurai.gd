@@ -90,7 +90,7 @@ func apply_new_spritesheet(new_texture: Texture2D):
 				# 2. Set the Region to the correct 192px "Bucket"
 				# Column = frame index, Row = determined by animation name
 				unique_frame.region = Rect2(
-					i * new_cell_size, 
+					column_index * new_cell_size, 
 					row * new_cell_size, 
 					new_cell_size, 
 					new_cell_size
