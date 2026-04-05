@@ -236,7 +236,8 @@ shape = SubResource("RectangleShape2D_o0lna")
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(1.1, 1.1)
 limit_left = 0
-limit_right = 2290
-limit_bottom = 640
+limit_top = 0
+limit_right = 5131
+limit_bottom = 900
 
 [connection signal="body_entered" from="SwordArea" to="." method="_on_sword_area_body_entered"]
