@@ -9,6 +9,7 @@ const TARGET_PIXEL_HEIGHT = 100.0
 
 @onready var samurai = $Sprite2D
 @onready var sword_area = $SwordArea
+@onready var health_bar = $HealthBar
 
 var max_health: int = 100
 var current_health: int = 100
@@ -24,7 +25,6 @@ func _ready() -> void:
 		path_to_load = Global.custom_skin_path
 	else:
 		path_to_load = "res://Characters/TestingSprites/custom_skin.png"
-	
 	
 	if Global.generated_new_character:
 		if FileAccess.file_exists(path_to_load):
@@ -44,6 +44,10 @@ func _ready() -> void:
 	else:
 		# If there is no new sprite then load in the pre-existing one
 		_load_default_sprite()
+	
+	# Initializing health bar
+	health_bar.max_value = max_health
+	health_bar.value = current_health
 	
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
@@ -195,7 +199,16 @@ func take_damage(amount: int):
 	
 	current_health -= amount
 	
+	print("You were hit!")
+	
+	# Update health bar
+	if health_bar:
+		health_bar.value = current_health
+		print("Set health bar value to: ", health_bar.value)
+	
 	if current_health <= 0:
+		# Hide health bar when dead
+		health_bar.hide()
 		die()
 	else:
 		is_hurt = true
