@@ -12,7 +12,7 @@ const TARGET_PIXEL_HEIGHT = 100.0
 @onready var health_bar = $HealthBar
 
 var max_health: int = 100
-var current_health: int = 20
+var current_health: int = 100
 var is_dead: bool = false
 
 var is_attacking: bool = false
