@@ -212,6 +212,7 @@ func die():
 	
 	get_tree().paused = true
 	print("Game Over - Engine Paused")
+	get_node("/root/Node2D/EndScreen").show_end_screen(false)
 
 func scale_generated_sprite():
 	var frame_height = 0.0
