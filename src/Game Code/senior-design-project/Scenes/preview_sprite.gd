@@ -51,9 +51,9 @@ func _on_retry_button_pressed() -> void:
 func _run_python_generation(prompt_text: String) -> void:
 	var script_path = ProjectSettings.globalize_path("res://generator.py")
 	var save_path = ProjectSettings.globalize_path("res://Characters/TestingSprites/custom_skin.png")
-	
-	var arguments = [script_path, prompt_text, save_path]
+
+	var arguments = [script_path, prompt_text, save_path, "--reuse-prompt"]
 	var output = []
-	
+
 	print("Python is regenerating with prompt: ", prompt_text)
-	OS.execute("python", arguments, output, true)
+	OS.execute("python", arguments, output,true)
