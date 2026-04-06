@@ -52,8 +52,12 @@ func _run_python_generation(prompt_text: String) -> void:
 	var script_path = ProjectSettings.globalize_path("res://generator.py")
 	var save_path = ProjectSettings.globalize_path("res://Characters/TestingSprites/custom_skin.png")
 
+	var project_dir=ProjectSettings.globalize_path("res://")
+	var python_exe = project_dir.path_join("../../../.venv/bin/python").simplify_path()
+	print(python_exe)
+	
 	var arguments = [script_path, prompt_text, save_path, "--reuse-prompt"]
 	var output = []
 
 	print("Python is regenerating with prompt: ", prompt_text)
-	OS.execute("python", arguments, output,true)
+	OS.execute(python_exe, arguments, output)

@@ -1,9 +1,10 @@
 extends CharacterBody2D
 
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -450.0
-const DAMAGE_AMOUNT = 20
+# Default stats — overridden by JSON if a companion file exists
+var SPEED = 300.0
+var JUMP_VELOCITY = -450.0
+var DAMAGE_AMOUNT = 20
 const FALL_DEATH_Y = 1000.0
 const TARGET_PIXEL_HEIGHT = 100.0
 
@@ -20,40 +21,38 @@ var is_hurt: bool = false
 
 func _ready() -> void:
 	var path_to_load = ""
-	
+
 	if Global.custom_skin_path != "":
 		path_to_load = Global.custom_skin_path
 	else:
 		path_to_load = "res://Characters/TestingSprites/custom_skin.png"
-	
-	if Global.generated_new_character:
-		if FileAccess.file_exists(path_to_load):
-			var custom_image = Image.new()
-			var err = custom_image.load(path_to_load)
-			
-			if err == OK:
-				var custom_texture = ImageTexture.create_from_image(custom_image)
-				apply_new_spritesheet(custom_texture)
-				print("Success: Loaded custom modded sprite sheet!")
-			else:
-				print("Error: Found custom_skin.png, but failed to load it. Code: ", err)
-				_load_default_sprite()
+
+	# Always try to load custom_skin.png first (works for both new generation
+	# and "Play with Current Character" replays)
+	if FileAccess.file_exists(path_to_load):
+		var custom_image = Image.new()
+		var err = custom_image.load(path_to_load)
+
+		if err == OK:
+			var custom_texture = ImageTexture.create_from_image(custom_image)
+			apply_new_spritesheet(custom_texture)
+			print("Success: Loaded custom sprite sheet from: ", path_to_load)
+			scale_generated_sprite()
+			_try_load_stats_from_json(path_to_load)
 		else:
-			print("Could not load in new sprite.")
+			print("Found custom_skin.png but failed to load it. Code: ", err)
 			_load_default_sprite()
 	else:
-		# If there is no new sprite then load in the pre-existing one
+		print("No custom sprite found. Loading default sprite.")
 		_load_default_sprite()
-	
+
 	# Initializing health bar
 	health_bar.max_value = max_health
 	health_bar.value = current_health
-	
+
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
 	sword_area.monitoring = false
-	
-	scale_generated_sprite()
 
 func _load_default_sprite():
 	print("No custom skin found. Loading current sprite.")
@@ -243,22 +242,67 @@ func die():
 
 func scale_generated_sprite():
 	var frame_height = 0.0
-	
+
 	# Scenario A: You are using an AnimatedSprite2D with SpriteFrames
 	if samurai is AnimatedSprite2D and samurai.sprite_frames:
 		var frame_texture = samurai.sprite_frames.get_frame_texture("idle", 0)
 		if frame_texture:
 			frame_height = float(frame_texture.get_height())
-			
+
 	# Scenario B: You are using a standard Sprite2D with a raw Texture
 	elif samurai is Sprite2D and samurai.texture:
 		# We divide the total height by vframes in case it's a grid sprite sheet
 		frame_height = float(samurai.texture.get_height()) / float(samurai.vframes)
-	
+
 	# Apply the scale if we successfully found the height
 	if frame_height > 0:
 		var scale_factor = TARGET_PIXEL_HEIGHT / frame_height
 		samurai.scale = Vector2(scale_factor, scale_factor)
 		print("Successfully scaled sprite to: ", samurai.scale)
-	else:
-		print("ERROR: Could not find texture to scale. Make sure the image is loaded first!")
+
+
+func _try_load_stats_from_json(png_path: String) -> void:
+	"""Load companion JSON file and apply game_stats to character vars."""
+	var json_path = png_path.replace(".png", ".json")
+
+	# Also check Global path override
+	if json_path.begins_with("res://"):
+		json_path = ProjectSettings.globalize_path(json_path)
+
+	if not FileAccess.file_exists(json_path):
+		print("No companion JSON found at: ", json_path)
+		print("Using default stats: SPEED=", SPEED, ", JUMP=", JUMP_VELOCITY, ", DMG=", DAMAGE_AMOUNT)
+		return
+
+	var file = FileAccess.open(json_path, FileAccess.READ)
+	var content = file.get_as_text()
+	file.close()
+
+	var json = JSON.new()
+	var parse_result = json.parse(content)
+
+	if parse_result != OK:
+		print("Failed to parse JSON stats: ", json.get_error_message())
+		return
+
+	var data = json.get_data()
+	if not data is Dictionary or not data.has("game_stats"):
+		print("JSON missing game_stats key")
+		return
+
+	var stats = data["game_stats"]
+
+	# Map NLP 0-100 scale to Godot scale
+	# SPEED: NLP 0-100 → Godot 150-450 (base 300, +/- 150)
+	if stats.has("speed"):
+		SPEED = 150.0 + (stats["speed"] / 100.0) * 300.0
+
+	# JUMP_VELOCITY: NLP 0-100 → Godot -250 to -550 (base -450)
+	if stats.has("jump_velocity"):
+		JUMP_VELOCITY = -250.0 - (stats["jump_velocity"] / 100.0) * 300.0
+
+	# DAMAGE_AMOUNT: NLP 0-100 → Godot 5-45 (base 20, +/- 20)
+	if stats.has("damage_amount"):
+		DAMAGE_AMOUNT = 5.0 + (stats["damage_amount"] / 100.0) * 40.0
+
+	print("Loaded JSON stats: SPEED=", SPEED, ", JUMP=", JUMP_VELOCITY, ", DMG=", DAMAGE_AMOUNT)

@@ -1,0 +1,32 @@
+{
+  "attributes": {
+    "height": null,
+    "height_confidence": 0.0,
+    "species": "ninja",
+    "species_confidence": 0.83,
+    "element": "ice",
+    "element_confidence": 0.81,
+    "primary_colors": [
+      "purple"
+    ],
+    "primary_colors_confidence": [
+      0.9
+    ],
+    "secondary_colors": [],
+    "secondary_colors_confidence": [],
+    "clothing": [
+      "clothes"
+    ],
+    "clothing_confidence": [
+      0.81
+    ],
+    "equipment": [],
+    "equipment_confidence": []
+  },
+  "game_stats": {
+    "speed": 50,
+    "jump_velocity": 50,
+    "damage_amount": 67
+  },
+  "input_text": "A ninja with ice powers wearing purple clothes"
+}
