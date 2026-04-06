@@ -42,9 +42,11 @@ func _ready() -> void:
 		else:
 			print("Found custom_skin.png but failed to load it. Code: ", err)
 			_load_default_sprite()
+			_try_load_stats_from_json(path_to_load)
 	else:
 		print("No custom sprite found. Loading default sprite.")
 		_load_default_sprite()
+		_try_load_stats_from_json(path_to_load)
 
 	# Initializing health bar
 	health_bar.max_value = max_health
@@ -270,10 +272,11 @@ func _try_load_stats_from_json(png_path: String) -> void:
 	3. Hardcoded defaults (SPEED=300, JUMP=-450, DMG=20)
 	"""
 	# Priority 1: User-modified stats from preview screen sliders
+	# These are on the NLP 0-100 scale, so map them to Godot scale
 	if Global.has_custom_stats:
-		SPEED = Global.custom_speed
-		JUMP_VELOCITY = Global.custom_jump_velocity
-		DAMAGE_AMOUNT = Global.custom_damage_amount
+		SPEED = 150.0 + (Global.custom_speed / 100.0) * 300.0
+		JUMP_VELOCITY = -250.0 - (Global.custom_jump_velocity / 100.0) * 300.0
+		DAMAGE_AMOUNT = 5.0 + (Global.custom_damage_amount / 100.0) * 40.0
 		print("Using user-modified stats: SPEED=", SPEED, ", JUMP=", JUMP_VELOCITY, ", DMG=", DAMAGE_AMOUNT)
 		return
 
