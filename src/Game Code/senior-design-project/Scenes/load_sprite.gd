@@ -20,7 +20,36 @@ func _on_file_selected(path: String):
 		Global.generated_new_character = true
 		
 		# grab the corresponding values based on the sprite timestamp and put them into the existing JSON file
-
+		# get timestamp
+		var filename = path.get_file()
+		var timestamp = filename.replace("custome_skin_backup_", "").replace(".png","")
+		
+		# find corresponding attributes
+		var correspondingJSONPath = "res//Characters/AttributeJSONs/" + timestamp + ".json"
+		var correspondingJSONFile = FileAccess.open(correspondingJSONPath, FileAccess.READ)
+		if null == correspondingJSONFile:
+			print("No attribute JSON for ", timestamp)
+			return
+		var correspondingJSONParser = JSON.new()
+		correspondingJSONParser.parse(correspondingJSONFile.get_as_text())
+		correspondingJSONFile.close()
+		var correspondingData = correspondingJSONParser.get_data()
+		
+		# open template JSON
+		var baseJSONFile = FileAccess.open("", FileAccess.READ_WRITE)
+		var baseJSONParser = JSON.new()
+		baseJSONParser.parse(baseJSONFile.get_as_text())
+		var baseData = baseJSONParser.get_data()
+		
+		baseData["game_stats"]["speed"] = correspondingData["speed"]
+		baseData["game_stats"]["jump_velocity"] = correspondingData["jump_velocity"]
+		baseData["game_stats"]["damage_amount"] = correspondingData["damage_amount"]
+		
+		baseJSONFile.seek(0)
+		baseJSONFile.store_string(JSON.stringify(baseData))
+		baseJSONFile.close()
+		
+		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass

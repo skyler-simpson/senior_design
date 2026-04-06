@@ -59,11 +59,12 @@ func _ready() -> void:
 		var file = FileAccess.open("", FileAccess.READ)
 		var json = JSON.new()
 		json.parse(file.get_as_text())
+		var data = json.get_data()
 		
-		if json.has("game_stats"):
-			if json["game_stats"].has("speed"): SPEED = json["game_stats"]["speed"]
-			if json["game_stats"].has("jump_velocity"): JUMP_VELOCITY = json["game_stats"]["jump_velocity"]
-			if json["game_stats"].has("damage_amount"): DAMAGE_AMOUNT = json["game_stats"]["damage_amount"]
+		if data.has("game_stats"):
+			if data["game_stats"].has("speed"): SPEED = data["game_stats"]["speed"]
+			if data["game_stats"].has("jump_velocity"): JUMP_VELOCITY = data["game_stats"]["jump_velocity"]
+			if data["game_stats"].has("damage_amount"): DAMAGE_AMOUNT = data["game_stats"]["damage_amount"]
 	
 		# look for file and write to it
 		var attributeJSONsPATH = "res://Characters/AttributeJSONS/"
@@ -75,10 +76,10 @@ func _ready() -> void:
 				var attributePath = attributeJSONsPATH + attributeJSON
 				
 				# read JSON
-				var attributeJSONFileR = FileAccess.open(attributePath, FileAccess.READ)
-				var attributeJSONData = JSON.new()
-				attributeJSONData.parse(attributeJSONFileR.get_as_text())
-				attributeJSONFileR.close()
+				var attributeJSONFile = FileAccess.open(attributePath, FileAccess.READ_WRITE)
+				var attributeJSONParser = JSON.new()
+				attributeJSONParser.parse(attributeJSONFile.get_as_text())
+				var attributeJSONData = attributeJSONParser.get_data()
 				
 				# add attributes
 				attributeJSONData["speed"] = SPEED
@@ -86,9 +87,9 @@ func _ready() -> void:
 				attributeJSONData["damage_amount"] = DAMAGE_AMOUNT
 				
 				# write JSON
-				var attributeJSONFileW = FileAccess.open(attributePath, FileAccess.WRITE)
-				attributeJSONFileW.store_string(JSON.stringify(attributeJSONData))
-				attributeJSONFileW.close()
+				attributeJSONFile.seek(0)
+				attributeJSONFile.store_string(JSON.stringify(attributeJSONData))
+				attributeJSONFile.close()
 				
 				# rename
 				var newAttributePath = attributeJSONsPATH + attributeJSON.replace("_NEW", "")
