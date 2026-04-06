@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 from PIL import Image
 from io import BytesIO
 
+import shutil
+from datetime import datetime
+
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 
@@ -33,8 +36,6 @@ def generate_sprite_sheet(description, save_path):
                 if part.inline_data is not None:
                     raw_image = Image.open(BytesIO(part.inline_data.data))
                     clean_image = raw_image.convert("RGBA")
-
-                    clean_image.save(r"C:\Users\thoma\OneDrive\Documents\Fall 2025\Old Generated images\Good Images\before_image.png", format="PNG")
 
                     # Refining and resizing the image logic
                     img_w, img_h = clean_image.size
@@ -89,6 +90,19 @@ def generate_sprite_sheet(description, save_path):
                                     dest_y = (row * target_cell_size) + (target_cell_size // 2) - (ch // 2)
                                     
                                     final_sheet.paste(char_sprite, (dest_x, dest_y), char_sprite)
+                    
+                    backup_directyory = os.path.join(os.path.dirname(save_path), "Old Characters")
+                    
+                    if not os.path.exists(backup_directyory):
+                        os.makedirs(backup_directyory)
+                    
+                    if os.path.exists(save_path):
+                        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                        backup_filename = f"custome_skin_backup_{timestamp}.png"
+                        backup_path = os.path.join(backup_directyory, backup_filename)
+                        
+                        shutil.move(save_path, backup_path)
+                        print("Moved old skin to backups folder")
 
                     # Save results
                     final_sheet.save(save_path, format="PNG")

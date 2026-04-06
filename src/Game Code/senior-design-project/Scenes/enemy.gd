@@ -27,6 +27,7 @@ var player_target = null
 @onready var cooldown_timer = $AttackCooldownTimer
 
 func _ready():
+	add_to_group("enemies")
 	aggro_range.body_entered.connect(_on_aggro_range_body_entered)
 	aggro_range.body_exited.connect(_on_aggro_range_body_exited)
 	attack_range.body_entered.connect(_on_attack_range_body_entered)

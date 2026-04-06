@@ -1,0 +1,53 @@
+[gd_scene load_steps=11 format=3 uid="uid://d0jmvibm8po44"]
+
+[ext_resource type="Script" uid="uid://dlj0kvx73mxmy" path="res://chest.gd" id="1_8uwsg"]
+[ext_resource type="Texture2D" uid="uid://b0ekcvmy8bc31" path="res://Characters/Chest/c1.png" id="2_bv3sb"]
+[ext_resource type="Shader" uid="uid://cq5vda6moovx" path="res://chest.gdshader" id="2_day8l"]
+[ext_resource type="Texture2D" uid="uid://1kn0r5xqtv41" path="res://Characters/Chest/c2.png" id="3_day8l"]
+[ext_resource type="Texture2D" uid="uid://c2bffv5qe86bg" path="res://Characters/Chest/c3.png" id="4_t3ekh"]
+[ext_resource type="Texture2D" uid="uid://d4jsius25j2gy" path="res://Characters/Chest/c4.png" id="5_x6u83"]
+[ext_resource type="Texture2D" uid="uid://fopfoc57i74" path="res://Characters/Chest/c5.png" id="6_v4ow6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x7mpe"]
+size = Vector2(209, 179)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t3ekh"]
+shader = ExtResource("2_day8l")
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_oh7c0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_bv3sb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_day8l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_t3ekh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_x6u83")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_v4ow6")
+}],
+"loop": false,
+"name": &"default",
+"speed": 10.0
+}]
+
+[node name="Chest" type="StaticBody2D"]
+collision_layer = 4
+script = ExtResource("1_8uwsg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2.5, 40.5)
+shape = SubResource("RectangleShape2D_x7mpe")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+material = SubResource("ShaderMaterial_t3ekh")
+sprite_frames = SubResource("SpriteFrames_oh7c0")
+frame = 2
+frame_progress = 0.44418168
+flip_h = true

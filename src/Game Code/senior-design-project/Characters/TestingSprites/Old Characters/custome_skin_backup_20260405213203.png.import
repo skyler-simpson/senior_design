@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ultk7uqe47pa"
-path="res://.godot/imported/runner.png-b9598e96dc360f2bd933ff3faf43fc03.ctex"
+uid="uid://c7jemhxuj1x7m"
+path="res://.godot/imported/custome_skin_backup_20260405213203.png-d2ded6645d757620e45050634d232d3c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://runner.png"
-dest_files=["res://.godot/imported/runner.png-b9598e96dc360f2bd933ff3faf43fc03.ctex"]
+source_file="res://Characters/TestingSprites/Old Characters/custome_skin_backup_20260405213203.png"
+dest_files=["res://.godot/imported/custome_skin_backup_20260405213203.png-d2ded6645d757620e45050634d232d3c.ctex"]
 
 [params]
 

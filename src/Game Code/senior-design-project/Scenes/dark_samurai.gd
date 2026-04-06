@@ -9,6 +9,7 @@ const TARGET_PIXEL_HEIGHT = 100.0
 
 @onready var samurai = $Sprite2D
 @onready var sword_area = $SwordArea
+@onready var health_bar = $HealthBar
 
 var max_health: int = 100
 var current_health: int = 100
@@ -18,12 +19,17 @@ var is_attacking: bool = false
 var is_hurt: bool = false
 
 func _ready() -> void:
-	var custom_skin_path = "res://Characters/TestingSprites/custom_skin.png"
+	var path_to_load = ""
+	
+	if Global.custom_skin_path != "":
+		path_to_load = Global.custom_skin_path
+	else:
+		path_to_load = "res://Characters/TestingSprites/custom_skin.png"
 	
 	if Global.generated_new_character:
-		if FileAccess.file_exists(custom_skin_path):
+		if FileAccess.file_exists(path_to_load):
 			var custom_image = Image.new()
-			var err = custom_image.load(custom_skin_path)
+			var err = custom_image.load(path_to_load)
 			
 			if err == OK:
 				var custom_texture = ImageTexture.create_from_image(custom_image)
@@ -38,6 +44,10 @@ func _ready() -> void:
 	else:
 		# If there is no new sprite then load in the pre-existing one
 		_load_default_sprite()
+	
+	# Initializing health bar
+	health_bar.max_value = max_health
+	health_bar.value = current_health
 	
 	samurai.animation_finished.connect(_on_animation_finished)
 	add_to_group("player")
@@ -55,7 +65,7 @@ func apply_new_spritesheet(new_texture: Texture2D):
 	if not frames:
 		return
 		
-	var new_cell_size = 192 
+	var new_cell_size = 192
 	
 	for anim_name in frames.get_animation_names():
 		# Find which row this animation should live on (0-5)
@@ -72,10 +82,15 @@ func apply_new_spritesheet(new_texture: Texture2D):
 				# 1. Swap the image
 				unique_frame.atlas = new_texture
 				
+				# New code right here
+				var column_index = i
+				if anim_name.to_lower() == "falling":
+					column_index = i + 3
+				
 				# 2. Set the Region to the correct 192px "Bucket"
 				# Column = frame index, Row = determined by animation name
 				unique_frame.region = Rect2(
-					i * new_cell_size, 
+					column_index * new_cell_size, 
 					row * new_cell_size, 
 					new_cell_size, 
 					new_cell_size
@@ -89,7 +104,7 @@ func _get_row_index_for_animation(anim_name: String) -> int:
 	var n = anim_name.to_lower()
 	if "idle" in n: return 0
 	if "run" in n or "walk" in n: return 1
-	if "jump" in n: return 2
+	if "jump" in n or "fall" in n: return 2
 	if "attack" in n: return 3
 	if "hit" in n or "hurt" in n: return 4
 	if "death" in n or "die" in n: return 5
@@ -121,8 +136,6 @@ func _physics_process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("attack1") and is_on_floor() and not is_attacking:
 		start_attack("attack1")
-	elif Input.is_action_just_pressed("attack2") and is_on_floor() and not is_attacking:
-		start_attack("attack2")
 	
 	if not is_attacking:
 		if direction:
@@ -171,7 +184,7 @@ func _on_sword_area_body_entered(body):
 func _on_animation_finished() -> void:
 	var current_animation = samurai.animation
 	
-	if current_animation == "attack1" or current_animation == "attack2":
+	if current_animation == "attack1":
 		is_attacking = false
 		# Turn OFF the sword hitbox when attack ends
 		sword_area.monitoring = false
@@ -186,7 +199,16 @@ func take_damage(amount: int):
 	
 	current_health -= amount
 	
+	print("You were hit!")
+	
+	# Update health bar
+	if health_bar:
+		health_bar.value = current_health
+		print("Set health bar value to: ", health_bar.value)
+	
 	if current_health <= 0:
+		# Hide health bar when dead
+		health_bar.hide()
 		die()
 	else:
 		is_hurt = true
@@ -195,14 +217,24 @@ func take_damage(amount: int):
 		samurai.play("hit")
 
 func die():
+	# Prevent function from calling multiple times
+	if is_dead: return
+	
 	is_dead = true
-	velocity.x = 0
+	set_physics_process(false)
+	
+	is_attacking = false
+	is_hurt = false
+	velocity = Vector2.ZERO
+	
+	samurai.stop()
 	samurai.play("die")
 	
 	await samurai.animation_finished
 	
 	get_tree().paused = true
 	print("Game Over - Engine Paused")
+	get_node("/root/Node2D/EndScreen").show_end_screen(false)
 
 func scale_generated_sprite():
 	var frame_height = 0.0

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dl3540pjkxlf0"
-path="res://.godot/imported/Jump (32x32).png-48d12cdd362a83099e8163155d84ba3a.ctex"
+uid="uid://cfpdxjb5q5xf7"
+path="res://.godot/imported/custome_skin_backup_20260403200928.png-0e70625d7fa362e4ac793f08353f7ef0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Characters/Ninja Frog/Jump (32x32).png"
-dest_files=["res://.godot/imported/Jump (32x32).png-48d12cdd362a83099e8163155d84ba3a.ctex"]
+source_file="res://Characters/TestingSprites/Old Characters/custome_skin_backup_20260403200928.png"
+dest_files=["res://.godot/imported/custome_skin_backup_20260403200928.png-0e70625d7fa362e4ac793f08353f7ef0.ctex"]
 
 [params]
 

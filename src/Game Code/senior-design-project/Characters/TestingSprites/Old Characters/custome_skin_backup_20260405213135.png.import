@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://vgxcetloefuy"
-path="res://.godot/imported/Run (32x32).png-3393c7552eace7800e4678820be3adaf.ctex"
+uid="uid://bgft1ffvst1ul"
+path="res://.godot/imported/custome_skin_backup_20260405213135.png-853acd3928c9efa490dc5dc398526ce3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Characters/Ninja Frog/Run (32x32).png"
-dest_files=["res://.godot/imported/Run (32x32).png-3393c7552eace7800e4678820be3adaf.ctex"]
+source_file="res://Characters/TestingSprites/Old Characters/custome_skin_backup_20260405213135.png"
+dest_files=["res://.godot/imported/custome_skin_backup_20260405213135.png-853acd3928c9efa490dc5dc398526ce3.ctex"]
 
 [params]
 

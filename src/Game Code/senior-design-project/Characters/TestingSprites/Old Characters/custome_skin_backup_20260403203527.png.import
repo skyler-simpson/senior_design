@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2t020fc74hni"
-path="res://.godot/imported/Idle (32x32).png-5d15a3f855b156b5a399344a80bfd92c.ctex"
+uid="uid://mp2hfdgdlp6c"
+path="res://.godot/imported/custome_skin_backup_20260403203527.png-df09a27a90f69f99d4f03084aab27efc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Characters/Ninja Frog/Idle (32x32).png"
-dest_files=["res://.godot/imported/Idle (32x32).png-5d15a3f855b156b5a399344a80bfd92c.ctex"]
+source_file="res://Characters/TestingSprites/Old Characters/custome_skin_backup_20260403203527.png"
+dest_files=["res://.godot/imported/custome_skin_backup_20260403203527.png-df09a27a90f69f99d4f03084aab27efc.ctex"]
 
 [params]
 
