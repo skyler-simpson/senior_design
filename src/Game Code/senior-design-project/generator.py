@@ -85,6 +85,23 @@ def _build_image_prompt(attributes: dict, raw_input: str) -> str:
         return system_prompts.prepend_prompt() + raw_input + ". " + system_prompts.append_prompt()
 
 
+# ---------------------------------------------------------------------------
+# Stat breakdown printer — shows deltas from base values
+# ---------------------------------------------------------------------------
+_BASE_STATS = {"speed": 50, "jump_velocity": 50, "damage_amount": 50}
+
+
+def _print_stat_breakdown(game_stats: dict) -> None:
+    """Print how much each stat changed from the base value."""
+    print("\n=== Game Stat Breakdown ===")
+    for key, label in [("damage_amount", "DAMAGE"), ("speed", "SPEED"), ("jump_velocity", "JUMP")]:
+        base = _BASE_STATS[key]
+        final = game_stats.get(key, base)
+        delta = final - base
+        sign = f"+{delta}" if delta >= 0 else str(delta)
+        print(f"  {label:6s}: {base:3d} → {final:3d}  ({sign})")
+
+
 def generate_sprite_sheet(description, save_path, prompt_override=None):
     """Generate a sprite sheet from a character description.
 
@@ -120,6 +137,9 @@ def generate_sprite_sheet(description, save_path, prompt_override=None):
 
         # --- 2. Build structured image prompt ---
         prompt = _build_image_prompt(attributes, description)
+
+        # Print stat deltas from base values
+        _print_stat_breakdown(game_stats)
 
     print(f"\n=== Image Prompt ===\n{prompt}\n")
 
