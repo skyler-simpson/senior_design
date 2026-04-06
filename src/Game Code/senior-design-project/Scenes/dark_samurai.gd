@@ -4,7 +4,7 @@ extends CharacterBody2D
 const SPEED = 300.0
 const JUMP_VELOCITY = -450.0
 const DAMAGE_AMOUNT = 20
-
+const FALL_DEATH_Y = 1000.0
 const TARGET_PIXEL_HEIGHT = 100.0
 
 @onready var samurai = $Sprite2D
@@ -111,6 +111,11 @@ func _get_row_index_for_animation(anim_name: String) -> int:
 	return 0
 
 func _physics_process(delta: float) -> void:
+	if global_position.y > FALL_DEATH_Y and not is_dead:
+		print(global_position)
+		die()
+		return
+		
 	# If the player is dead then stop all movement
 	if is_dead:
 		if not is_on_floor():
