@@ -65,6 +65,35 @@ func _ready() -> void:
 			if json["game_stats"].has("jump_velocity"): JUMP_VELOCITY = json["game_stats"]["jump_velocity"]
 			if json["game_stats"].has("damage_amount"): DAMAGE_AMOUNT = json["game_stats"]["damage_amount"]
 	
+		# look for file and write to it
+		var attributeJSONsPATH = "res://Characters/AttributeJSONS/"
+		var attributeJSONPool = DirAccess.get_files_at(attributeJSONsPATH)
+		
+		for attributeJSON in attributeJSONPool:
+			if attributeJSON.ends_with("_NEW.json"):
+				# JSON path
+				var attributePath = attributeJSONsPATH + attributeJSON
+				
+				# read JSON
+				var attributeJSONFileR = FileAccess.open(attributePath, FileAccess.READ)
+				var attributeJSONData = JSON.new()
+				attributeJSONData.parse(attributeJSONFileR.get_as_text())
+				attributeJSONFileR.close()
+				
+				# add attributes
+				attributeJSONData["speed"] = SPEED
+				attributeJSONData["jump_velocity"] = JUMP_VELOCITY
+				attributeJSONData["damage_amount"] = DAMAGE_AMOUNT
+				
+				# write JSON
+				var attributeJSONFileW = FileAccess.open(attributePath, FileAccess.WRITE)
+				attributeJSONFileW.store_string(JSON.stringify(attributeJSONData))
+				attributeJSONFileW.close()
+				
+				# rename
+				var newAttributePath = attributeJSONsPATH + attributeJSON.replace("_NEW", "")
+				DirAccess.rename_absolute(attributePath, newAttributePath)
+	
 	print("S=%s\nJ=%s\nD=%s\n" % [SPEED, JUMP_VELOCITY, DAMAGE_AMOUNT])
 
 func _load_default_sprite():

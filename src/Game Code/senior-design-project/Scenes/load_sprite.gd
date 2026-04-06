@@ -18,6 +18,8 @@ func _on_file_selected(path: String):
 		# Update the global state
 		Global.custom_skin_path = path
 		Global.generated_new_character = true
+		
+		# grab the corresponding values based on the sprite timestamp and put them into the existing JSON file
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
