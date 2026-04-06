@@ -3,8 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://cs6g2htvglyx0" path="res://Dungeon Backdrop.jpg" id="1_epypp"]
 [ext_resource type="Texture2D" uid="uid://bya1uu4k3djou" path="res://END (@ENDESGA) on X.jpg" id="2_0hol4"]
 [ext_resource type="PackedScene" uid="uid://cyep4jp51tgi1" path="res://Scenes/DarkSamurai.tscn" id="4_0hol4"]
-[ext_resource type="PackedScene" path="res://chest.tscn" id="5_q6r6c"]
-[ext_resource type="Script" path="res://end_screen.gd" id="6_d21ai"]
+[ext_resource type="PackedScene" uid="uid://d0jmvibm8po44" path="res://chest.tscn" id="5_q6r6c"]
+[ext_resource type="Script" uid="uid://bcbumod8jo1yy" path="res://end_screen.gd" id="6_d21ai"]
 [ext_resource type="PackedScene" uid="uid://dsnjv6paa0q34" path="res://Scenes/enemy.tscn" id="6_kdubu"]
 [ext_resource type="FontFile" uid="uid://bgxki5i8v4bwy" path="res://Fonts/PressStart2P-Regular.ttf" id="7_d21ai"]
 
@@ -2018,12 +2018,6 @@ metadata/_edit_use_anchors_ = true
 [node name="Enemy" parent="." instance=ExtResource("6_kdubu")]
 position = Vector2(1195, 549)
 
-[node name="Enemy" parent="Enemy" instance=ExtResource("6_kdubu")]
-position = Vector2(4234, -50)
-
-[node name="Enemy3" parent="Enemy" instance=ExtResource("6_kdubu")]
-position = Vector2(6206, 191)
-
 [node name="Chest" parent="." instance=ExtResource("5_q6r6c")]
 position = Vector2(8206, 747)
 scale = Vector2(0.5, 0.5)
@@ -2065,3 +2059,9 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("7_d21ai")
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
+
+[node name="Enemy2" parent="." instance=ExtResource("6_kdubu")]
+position = Vector2(5429, 499)
+
+[node name="Enemy3" parent="." instance=ExtResource("6_kdubu")]
+position = Vector2(7401, 740)
