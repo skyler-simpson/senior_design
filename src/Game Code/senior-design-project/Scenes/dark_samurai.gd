@@ -1,9 +1,9 @@
 extends CharacterBody2D
 
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -450.0
-const DAMAGE_AMOUNT = 20
+var SPEED : float = 300.0
+var JUMP_VELOCITY : float = -450.0
+var DAMAGE_AMOUNT : float = 20
 
 const TARGET_PIXEL_HEIGHT = 100.0
 
@@ -54,6 +54,18 @@ func _ready() -> void:
 	sword_area.monitoring = false
 	
 	scale_generated_sprite()
+	
+	if FileAccess.file_exists(""):
+		var file = FileAccess.open("", FileAccess.READ)
+		var json = JSON.new()
+		json.parse(file.get_as_text())
+		
+		if json.has("game_stats"):
+			if json["game_stats"].has("speed"): SPEED = json["game_stats"]["speed"]
+			if json["game_stats"].has("jump_velocity"): JUMP_VELOCITY = json["game_stats"]["jump_velocity"]
+			if json["game_stats"].has("damage_amount"): DAMAGE_AMOUNT = json["game_stats"]["damage_amount"]
+	
+	print("S=%s\nJ=%s\nD=%s\n" % [SPEED, JUMP_VELOCITY, DAMAGE_AMOUNT])
 
 func _load_default_sprite():
 	print("No custom skin found. Loading current sprite.")
