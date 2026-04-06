@@ -265,14 +265,15 @@ shape = SubResource("RectangleShape2D_o0lna")
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(1.1, 1.1)
 limit_left = 0
-limit_top = 0
-limit_right = 5131
-limit_bottom = 900
+limit_top = -4
+limit_right = 8483
+limit_bottom = 969
+position_smoothing_speed = 2.5
 
 [node name="HealthBar" type="ProgressBar" parent="."]
 offset_left = 31.0
 offset_top = -65.0
-offset_right = 42.63539
+offset_right = 39.220318
 offset_bottom = -8.800922
 rotation = 1.5707964
 theme_override_styles/background = SubResource("StyleBoxFlat_jdu6q")

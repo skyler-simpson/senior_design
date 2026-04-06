@@ -25,12 +25,16 @@ func _on_generate_new_character_pressed() -> void:
 	var script_path = ProjectSettings.globalize_path("res://generator.py")
 	var save_path = ProjectSettings.globalize_path("res://Characters/TestingSprites/custom_skin.png")
 	
+	var project_dir=ProjectSettings.globalize_path("res://")
+	var python_exe = project_dir.path_join("../../../.venv/bin/python").simplify_path()
+	print(python_exe)
+	
 	# Pass the prompt AND the save path to Python
 	var arguments = [script_path, user_prompt, save_path]
 	var python_output = [] 
 	
 	print("Running Python...")
-	OS.execute("python", arguments, python_output, true)
+	OS.execute(python_exe, arguments, python_output)
 	
 	if python_output.size() > 0:
 		print("Python Output: ", python_output[0])

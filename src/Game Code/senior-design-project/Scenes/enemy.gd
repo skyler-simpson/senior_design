@@ -25,6 +25,7 @@ var player_target = null
 @onready var attack_range = $AttackRange
 @onready var sword_hitbox = $SwordHitbox
 @onready var cooldown_timer = $AttackCooldownTimer
+@onready var health_bar = $HealthBar
 
 func _ready():
 	add_to_group("enemies")
@@ -35,6 +36,9 @@ func _ready():
 	anim_sprite.animation_finished.connect(_on_animation_finished)
 	
 	cooldown_timer.timeout.connect(_on_cooldown_timeout)
+	
+	health_bar.max_value = max_health
+	health_bar.value = current_health
 	
 
 func _physics_process(delta: float) -> void:
@@ -94,7 +98,12 @@ func take_damage(amount):
 	
 	current_health -= amount
 	
+	if health_bar:
+		health_bar.value = current_health
+		print("Enenmy health bar value set to: ", health_bar.value)
+	
 	if current_health <= 0:
+		health_bar.hide()
 		die()
 	else:
 		current_state = State.HURT
@@ -132,10 +141,18 @@ func _on_aggro_range_body_entered(body):
 func _on_aggro_range_body_exited(body):
 	if body == player_target:
 		player_target = null
+		
+		# Check to see if the enemy is dieing
+		if current_state == State.DEAD:
+			return
+			
 		if current_state != State.ATTACKING and current_state != State.COOLDOWN:
 			current_state = State.IDLE
 
 func _on_attack_range_body_entered(body):
+	if current_state == State.DEAD: 
+		return
+	
 	if body == player_target and current_state == State.CHASE:
 		start_attack()
 

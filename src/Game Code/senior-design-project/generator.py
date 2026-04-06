@@ -1,5 +1,9 @@
-import sys
-import os
+# Force UTF-8 encoding on Windows so Unicode characters (✓, etc.) don't crash
+import io, os, sys
+os.environ.setdefault('PYTHONIOENCODING', 'utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 import json
 import system_prompts
 from google import genai
@@ -13,20 +17,53 @@ import shutil
 from datetime import datetime
 
 # ---------------------------------------------------------------------------
-# Import NLP pipeline — add the NLP Model directory to the import path
+# Import NLP pipeline — find the "NLP Model" directory robustly
 # ---------------------------------------------------------------------------
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(_SCRIPT_DIR)          # senior-design-project/
-_SRC_DIR     = os.path.dirname(_PROJECT_DIR)          # src/
-NLP_DIR      = os.path.join(_SRC_DIR, "NLP Model")
-sys.path.insert(0, NLP_DIR)
-from character_ner_inference import load_model, generate_json_response
+
+def _find_nlp_dir():
+    """Search for the NLP Model directory using multiple strategies."""
+    # Strategy 1: ../../NLP Model (script → senior-design-project → src → NLP Model)
+    candidate = os.path.normpath(os.path.join(_SCRIPT_DIR, "..", "..", "NLP Model"))
+    if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "character_ner_inference.py")):
+        return candidate
+
+    # Strategy 2: Walk up from the script directory looking for "NLP Model"
+    search_dir = os.path.dirname(_SCRIPT_DIR)
+    for _ in range(5):
+        candidate = os.path.join(search_dir, "NLP Model")
+        if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "character_ner_inference.py")):
+            return candidate
+        parent = os.path.dirname(search_dir)
+        if parent == search_dir:
+            break
+        search_dir = parent
+
+    # Strategy 3: Check the directory one level up (common on Windows)
+    candidate = os.path.normpath(os.path.join(_SCRIPT_DIR, "..", "NLP Model"))
+    if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "character_ner_inference.py")):
+        return candidate
+
+    return None
+
+NLP_DIR = _find_nlp_dir()
+if NLP_DIR:
+    sys.path.insert(0, NLP_DIR)
+    print(f"[generator] Found NLP Model at: {NLP_DIR}")
+else:
+    print("[generator] WARNING: NLP Model directory not found. NLP features disabled.")
+    print(f"[generator] Searched from: {_SCRIPT_DIR}")
+
+# Import NLP functions — gracefully handle missing module
+try:
+    from character_ner_inference import load_model, generate_json_response
+    _nlp = load_model()
+except (ImportError, Exception) as e:
+    print(f"[generator] NLP module not available: {e}")
+    _nlp = None
 
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
-
-# Load the NLP model once at module import time
-_nlp = load_model()
 
 # ---------------------------------------------------------------------------
 # Image-prompt builder — defaults when NLP cannot extract a field
