@@ -244,6 +244,7 @@ collision_layer = 2
 script = ExtResource("1_o0lna")
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 1
 material = SubResource("ShaderMaterial_sh0fd")
 scale = Vector2(4.0755434, 3.2046769)
 sprite_frames = SubResource("SpriteFrames_wtyr8")

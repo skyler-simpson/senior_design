@@ -301,6 +301,7 @@ collision_layer = 4
 script = ExtResource("1_1f0kj")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 2
 scale = Vector2(4.1328125, 3.8515625)
 sprite_frames = SubResource("SpriteFrames_4ycey")
 animation = &"die"
