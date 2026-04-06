@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 import system_prompts
 from google import genai
 from google.genai import types
@@ -11,15 +12,74 @@ from io import BytesIO
 import shutil
 from datetime import datetime
 
+# ---------------------------------------------------------------------------
+# Import NLP pipeline — add the NLP Model directory to the import path
+# ---------------------------------------------------------------------------
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_DIR = os.path.dirname(_SCRIPT_DIR)          # senior-design-project/
+_SRC_DIR     = os.path.dirname(_PROJECT_DIR)          # src/
+NLP_DIR      = os.path.join(_SRC_DIR, "NLP Model")
+sys.path.insert(0, NLP_DIR)
+from character_ner_inference import load_model, generate_json_response
+
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
+
+# Load the NLP model once at module import time
+_nlp = load_model()
+
+# ---------------------------------------------------------------------------
+# Image-prompt builder — defaults when NLP cannot extract a field
+# ---------------------------------------------------------------------------
+_DEFAULTS = {
+    "height":    "average height",
+    "element":   "fire",
+    "species":   "character",
+    "colors":    ["red"],
+    "clothing":  ["robes"],
+    "equipment": ["sword"],
+}
+
+
+def _build_image_prompt(attributes: dict, raw_input: str) -> str:
+    """Combine structured NLP attributes with the raw user description."""
+    height    = attributes.get("height")        or _DEFAULTS["height"]
+    species   = attributes.get("species")       or _DEFAULTS["species"]
+    element   = attributes.get("element")       or _DEFAULTS["element"]
+    primary   = attributes.get("primary_colors") or _DEFAULTS["colors"]
+    clothing  = attributes.get("clothing")       or _DEFAULTS["clothing"]
+    equipment = attributes.get("equipment")      or _DEFAULTS["equipment"]
+
+    core = (
+        f"A {height} {element} {species} wearing {primary[0]} {clothing[0]} "
+        f"wielding a {equipment[0]}"
+    )
+    return system_prompts.prepend_prompt() + core + ". " + raw_input + ". " + system_prompts.append_prompt()
 
 def generate_sprite_sheet(description, save_path):
     print(f"Generating character based on: {description}")
 
+    # --- 1. Run NLP pipeline to extract attributes and game stats ---
+    if _nlp is None:
+        print("Warning: NLP model not loaded. Using raw description only.")
+        attributes = {}
+        game_stats = {}
+    else:
+        result = generate_json_response(description, _nlp)
+        attributes = result["attributes"]
+        game_stats = result["game_stats"]
+        print("\n=== NLP Attributes ===")
+        print(json.dumps(attributes, indent=2))
+        print("\n=== Game Stats ===")
+        print(json.dumps(game_stats, indent=2))
+
+    # --- 2. Build structured image prompt ---
+    prompt = _build_image_prompt(attributes, description)
+    print(f"\n=== Image Prompt ===\n{prompt}\n")
+
+    # --- 3. Call Gemini ---
     client = genai.Client(api_key=gemini_api_key)
 
-    prompt = system_prompts.prepend_prompt() + description + system_prompts.append_prompt()
     print("Prompt ready, sending to Gemini...")
 
     try:
@@ -104,8 +164,18 @@ def generate_sprite_sheet(description, save_path):
                         shutil.move(save_path, backup_path)
                         print("Moved old skin to backups folder")
 
-                    # Save results
+                    # Save sprite sheet
                     final_sheet.save(save_path, format="PNG")
+                    
+                    # --- 4. Save companion JSON with NLP attributes and game stats ---
+                    json_path = save_path.replace(".png", ".json")
+                    with open(json_path, "w") as f:
+                        json.dump({
+                            "attributes": attributes,
+                            "game_stats": game_stats,
+                            "input_text": description
+                        }, f, indent=2)
+                    print(f"Stats saved to: {json_path}")
                     
                     print(f"Success! {target_cell_size}px sprite sheet saved to: {save_path}")
                     
