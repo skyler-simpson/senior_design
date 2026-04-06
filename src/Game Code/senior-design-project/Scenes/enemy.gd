@@ -141,10 +141,18 @@ func _on_aggro_range_body_entered(body):
 func _on_aggro_range_body_exited(body):
 	if body == player_target:
 		player_target = null
+		
+		# Check to see if the enemy is dieing
+		if current_state == State.DEAD:
+			return
+			
 		if current_state != State.ATTACKING and current_state != State.COOLDOWN:
 			current_state = State.IDLE
 
 func _on_attack_range_body_entered(body):
+	if current_state == State.DEAD: 
+		return
+	
 	if body == player_target and current_state == State.CHASE:
 		start_attack()
 
