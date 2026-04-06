@@ -11,6 +11,8 @@ from io import BytesIO
 import shutil
 from datetime import datetime
 
+import json
+
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 
@@ -103,6 +105,10 @@ def generate_sprite_sheet(description, save_path):
                         
                         shutil.move(save_path, backup_path)
                         print("Moved old skin to backups folder")
+
+                        # make the sprite JSON here
+                        with open(f"res://Charcters/AttributeJSONs/{timestamp}_NEW.json", 'w"') as f:
+                            json.dump({}, f)
 
                     # Save results
                     final_sheet.save(save_path, format="PNG")
