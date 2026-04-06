@@ -266,7 +266,7 @@ shape = SubResource("RectangleShape2D_o0lna")
 zoom = Vector2(1.1, 1.1)
 limit_left = 0
 limit_top = -4
-limit_right = 8483
+limit_right = 8400
 limit_bottom = 969
 position_smoothing_speed = 2.5
 
