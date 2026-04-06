@@ -262,10 +262,23 @@ func scale_generated_sprite():
 
 
 func _try_load_stats_from_json(png_path: String) -> void:
-	"""Load companion JSON file and apply game_stats to character vars."""
-	var json_path = png_path.replace(".png", ".json")
+	"""Load companion JSON file and apply game_stats to character vars.
 
-	# Also check Global path override
+	Priority order:
+	1. Global.has_custom_stats (user-modified sliders from preview screen)
+	2. Companion JSON file (NLP-extracted defaults)
+	3. Hardcoded defaults (SPEED=300, JUMP=-450, DMG=20)
+	"""
+	# Priority 1: User-modified stats from preview screen sliders
+	if Global.has_custom_stats:
+		SPEED = Global.custom_speed
+		JUMP_VELOCITY = Global.custom_jump_velocity
+		DAMAGE_AMOUNT = Global.custom_damage_amount
+		print("Using user-modified stats: SPEED=", SPEED, ", JUMP=", JUMP_VELOCITY, ", DMG=", DAMAGE_AMOUNT)
+		return
+
+	# Priority 2: Companion JSON file
+	var json_path = png_path.replace(".png", ".json")
 	if json_path.begins_with("res://"):
 		json_path = ProjectSettings.globalize_path(json_path)
 
