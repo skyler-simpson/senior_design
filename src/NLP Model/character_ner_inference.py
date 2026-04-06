@@ -355,7 +355,7 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
     cls = _species_class(species)
 
     # --- DAMAGE_AMOUNT ---
-    damage = 45
+    damage = 50
     melee_hits = sum(
         1
         for w in equipment
@@ -411,7 +411,7 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
     damage = int(max(0, min(100, damage)))
 
     # --- SPEED (nuanced) ---
-    speed = 52
+    speed = 50
     if height in ("short", "tiny", "petite", "small", "diminutive"):
         speed += 8
     elif height in ("tall", "towering", "massive", "huge", "large"):
