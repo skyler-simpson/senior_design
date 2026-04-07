@@ -11,8 +11,8 @@ ABSOLUTE STRUCTURE RULES:
 4. Do NOT draw grid lines, separators, borders, guides, or UI.
 5. True pixel art only.
 6. All frames must be identical in width and height.
-7. Each frame must be exactly 128x128 pixels.
-8. Total canvas must be exactly 640 pixels wide.
+7. Each frame must be exactly 192x192 pixels.
+8. Total canvas must be exactly 960 pixels wide.
 9. Each row contains exactly 5 frame slots.
 10. Frames populate left-to-right only.
 11. When an animation ends, STOP the row.

@@ -36,6 +36,9 @@ func _on_generate_new_character_pressed() -> void:
 	print("Running Python...")
 	OS.execute(python_exe, arguments, python_output)
 	
+	print("Running Python...")
+	OS.execute("python", arguments, python_output, true)
+	
 	if python_output.size() > 0:
 		print("Python Output: ", python_output[0])
 		

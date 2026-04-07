@@ -74,6 +74,10 @@ func _load_stats_from_json() -> void:
 				var jump = stats.get("jump_velocity", 50)
 				var damage = stats.get("damage_amount", 50)
 
+				# Enforce minimum jump of 40 so characters can always clear obstacles
+				if jump < 40:
+					jump = 40
+
 				_set_slider_values(speed, jump, damage)
 				print("Loaded stats from JSON: SPEED=", speed, " JUMP=", jump, " DMG=", damage)
 				return
@@ -85,7 +89,7 @@ func _load_stats_from_json() -> void:
 
 func _set_slider_values(speed: int, jump: int, damage: int) -> void:
 	speed_slider.value = clamp(speed, 0, 100)
-	jump_slider.value = clamp(jump, 0, 100)
+	jump_slider.value = clamp(jump, 40, 100)
 	damage_slider.value = clamp(damage, 0, 100)
 	_update_value_labels()
 
