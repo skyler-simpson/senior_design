@@ -13,12 +13,15 @@ var current_state = State.IDLE
 
 const SPEED = 120.0
 const GRAVITY = 980.0
-const DAMAGE = 15
+
+@export var DAMAGE = 15
 
 var max_health = 50
 var current_health = 50
 
 var player_target = null
+
+var has_damaged_player = false
 
 @onready var anim_sprite = $AnimatedSprite2D
 @onready var aggro_range = $AggroRange
@@ -37,6 +40,8 @@ func _ready():
 	anim_sprite.frame_changed.connect(_on_frame_changed)
 	
 	cooldown_timer.timeout.connect(_on_cooldown_timeout)
+	
+	sword_hitbox.body_entered.connect(_on_sword_hitbox_body_entered)
 	
 	health_bar.max_value = max_health
 	health_bar.value = current_health
@@ -83,16 +88,6 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 
-func _process(_delta):
-	if current_state == State.ATTACKING and sword_hitbox.monitoring:
-		# If the player is touching the sword hitbox, then they are hit
-		var overlapping_bodies = sword_hitbox.get_overlapping_bodies()
-		for body in overlapping_bodies:
-			if body.is_in_group("player"):
-				# The player will take damage
-				body.take_damage(DAMAGE)
-				sword_hitbox.monitoring = false
-
 func take_damage(amount):
 	if current_state == State.DEAD:
 		return
@@ -132,13 +127,14 @@ func start_attack():
 	current_state = State.ATTACKING
 	anim_sprite.play("attack")
 	sword_hitbox.monitoring = false
+	has_damaged_player = false
 
 func _on_frame_changed():
 	if anim_sprite.animation == "attack":
 		if anim_sprite.frame == 3 or anim_sprite.frame == 4 or anim_sprite.frame == 5:
-			sword_hitbox.monitoring = true
+			sword_hitbox.set_deferred("monitoring", true)
 		else:
-			sword_hitbox.monitoring = false
+			sword_hitbox.set_deferred("monitoring", false)
 
 func _on_aggro_range_body_entered(body):
 	if body.is_in_group("player"):
@@ -185,3 +181,11 @@ func _on_cooldown_timeout():
 	
 	if player_target and attack_range.overlaps_body(player_target):
 		start_attack()
+		
+func _on_sword_hitbox_body_entered(body):
+	if current_state == State.ATTACKING and not has_damaged_player:
+		if body.is_in_group("player"):
+			body.take_damage(DAMAGE)
+			has_damaged_player = true
+			sword_hitbox.set_deferred("monitoring", false)
+		

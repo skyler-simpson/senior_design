@@ -2017,6 +2017,7 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Enemy" parent="." instance=ExtResource("6_kdubu")]
 position = Vector2(1195, 549)
+DAMAGE = 10
 
 [node name="Chest" parent="." instance=ExtResource("5_q6r6c")]
 position = Vector2(8206, 747)
@@ -2065,3 +2066,4 @@ position = Vector2(5429, 499)
 
 [node name="Enemy3" parent="." instance=ExtResource("6_kdubu")]
 position = Vector2(7401, 740)
+DAMAGE = 20
