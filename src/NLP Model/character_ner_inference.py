@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -340,7 +341,8 @@ def extract_attributes(text: str, nlp) -> Dict[str, Any]:
 
 
 def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Dict[str, int]:
-    """Compute SPEED, JUMP_VELOCITY (0–100), DAMAGE_AMOUNT (0–100)."""
+    """Compute SPEED, JUMP_VELOCITY (0–100), DAMAGE_AMOUNT (0–100) from a
+    combination of extracted attributes and keyword scanning on raw text."""
     height = attributes.get("height")
     species = (attributes.get("species") or "").lower()
     element = (attributes.get("element") or "").lower()
@@ -354,40 +356,87 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
 
     cls = _species_class(species)
 
+    # Track whether meaningful keywords matched — used for randomization
+    keyword_matched = {"damage": False, "speed": False, "jump": False}
+
     # --- DAMAGE_AMOUNT ---
     damage = 50
+
+    # Weapon type from extracted equipment
     melee_hits = sum(
         1
         for w in equipment
-        if any(k in w for k in ("sword", "axe", "mace", "halberd", "spear", "lance", "dagger", "blade", "club", "hammer", "glaive", "bastard"))
+        if any(k in w for k in ("sword", "axe", "mace", "halberd", "spear", "lance", "dagger", "blade", "club", "hammer", "glaive", "bastard", "warhammer", "longsword", "greatsword", "claymore", "rapier", "falchion", "sabre"))
     )
     magic_hits = sum(
         1
         for w in equipment
-        if any(k in w for k in ("staff", "wand", "orb", "tome", "rod", "crystal"))
+        if any(k in w for k in ("staff", "wand", "orb", "tome", "rod", "crystal", "scepter", "tome", "book", "grimoire"))
     )
     hand_hits = sum(
         1
         for w in equipment
         if any(k in w for k in ("fist", "gauntlet", "knuckle", "claw"))
     )
+    ranged_hits = sum(
+        1
+        for w in equipment
+        if any(k in w for k in ("bow", "crossbow", "gun", "rifle", "pistol", "arrow"))
+    )
 
     if melee_hits:
         damage += 28 + min(12, melee_hits * 4)
     elif magic_hits:
         damage += 18 + min(12, magic_hits * 5)
+    elif ranged_hits:
+        damage += 15 + min(10, ranged_hits * 3)
     elif hand_hits:
         damage += 8 + min(7, hand_hits * 3)
     elif not equipment:
         damage += 5
 
+    # Weapon keywords from raw text (catches short prompts)
+    if has("sword", "blade", "axe", "hammer", "mace", "spear", "dagger", "weapon", "katana", "scythe", "halberd", "warhammer", "longsword", "greatsword", "claymore", "rapier"):
+        if not melee_hits:
+            damage += 20
+            keyword_matched["damage"] = True
+    if has("bow", "crossbow", "gun", "rifle", "pistol", "arrow", "ranged"):
+        if not ranged_hits:
+            damage += 15
+            keyword_matched["damage"] = True
+    if has("magic", "spell", "sorcery", "power", "energy", "arcane", "wizard"):
+        if not magic_hits:
+            damage += 15
+            keyword_matched["damage"] = True
+    if has("fist", "punch", "claw", "bare hand", "martial"):
+        if not hand_hits:
+            damage += 10
+            keyword_matched["damage"] = True
+
+    # Superhero / powerful character keywords
+    if has("superman", "omniman", "goku", "saiyan", "vegeta", "thor", "hulk", "god", "super", "hero"):
+        damage += 25
+        keyword_matched["damage"] = True
+    if has("villain", "demon", "dark lord", "evil", "destroyer", "killer", "assassin", "shadow", "death"):
+        damage += 20
+        keyword_matched["damage"] = True
+    if has("captain", "general", "king", "queen", "emperor", "lord", "commander", "master"):
+        damage += 10
+        keyword_matched["damage"] = True
+    if has("weak", "timid", "small", "tiny", "frail", "harmless"):
+        damage -= 10
+        keyword_matched["damage"] = True
+
     if element:
         damage += 12
+        keyword_matched["damage"] = True
 
-    if has("fierce", "powerful", "mighty", "brutal", "savage"):
+    if has("fierce", "powerful", "mighty", "brutal", "savage", "deadly", "strong", "lethal"):
         damage += 14
-    if has("timid", "cowardly", "weak", "frail"):
+        keyword_matched["damage"] = True
+    if has("timid", "cowardly", "weak", "frail", "gentle", "peaceful"):
         damage -= 8
+        keyword_matched["damage"] = True
 
     if cls == "warrior":
         damage += 5
@@ -403,24 +452,39 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
 
     heavy_armor = any(
         x in combined_text
-        for x in ("plate", "chainmail", "heavy", "reinforced", "greaves", "pauldron")
+        for x in ("plate", "chainmail", "heavy", "reinforced", "greaves", "pauldron", "armor", "shield")
     )
     if heavy_armor:
         damage += 4
 
     damage = int(max(0, min(100, damage)))
 
-    # --- SPEED (nuanced) ---
+    # --- SPEED ---
     speed = 50
     if height in ("short", "tiny", "petite", "small", "diminutive"):
         speed += 8
     elif height in ("tall", "towering", "massive", "huge", "large"):
         speed -= 7
 
-    if has("fast", "swift", "agile", "quick", "sleek"):
+    # Speed keywords from raw text
+    if has("fast", "swift", "agile", "quick", "sleek", "speed", "rapid", "lightning", "nimble"):
         speed += 16
-    if has("slow", "bulky", "ponderous"):
+        keyword_matched["speed"] = True
+    if has("slow", "bulky", "ponderous", "heavy", "lumbering", "sluggish"):
         speed -= 14
+        keyword_matched["speed"] = True
+    if has("flying", "fly", "jet", "turbo", "sonic", "flash", "wind", "air"):
+        speed += 20
+        keyword_matched["speed"] = True
+    if has("tank", "golem", "giant", "colossus", "ogre", "rock", "stone"):
+        speed -= 12
+        keyword_matched["speed"] = True
+    if has("ninja", "shadow", "stealth", "silent"):
+        speed += 10
+        keyword_matched["speed"] = True
+    if has("knight", "paladin", "warrior", "soldier"):
+        speed -= 4
+        keyword_matched["speed"] = True
 
     if cls == "rogue":
         speed += 10
@@ -436,7 +500,7 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
 
     speed = int(max(5, min(100, speed)))
 
-    # --- JUMP_VELOCITY (height, armor weight) ---
+    # --- JUMP_VELOCITY ---
     jv = 50
     if height in ("short", "tiny", "petite"):
         jv += 12
@@ -448,13 +512,44 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
     if any(s in species for s in ("dwarf", "golem", "ogre", "orc")):
         jv -= 10
 
-    if has("ethereal", "floating", "levitat", "spectral", "wisp"):
+    # Jump keywords from raw text
+    if has("jump", "leap", "bound", "spring", "bounce", "agile", "nimble"):
+        jv += 18
+        keyword_matched["jump"] = True
+    if has("fly", "flying", "float", "hover", "levitat"):
+        jv += 20
+        keyword_matched["jump"] = True
+    if has("heavy", "earthbound", "bulky", "grounded", "stone"):
+        jv -= 14
+        keyword_matched["jump"] = True
+    if has("ethereal", "spectral", "wisp", "spirit", "ghost"):
         jv += 22
+        keyword_matched["jump"] = True
+    if has("knight", "warrior", "tank", "paladin"):
+        jv -= 8
+        keyword_matched["jump"] = True
+    if has("ninja", "acrobat", "dancer", "monk"):
+        jv += 12
+        keyword_matched["jump"] = True
+
     if heavy_armor:
         jv -= 14
-    if has("heavy", "earthbound", "bulky"):
-        jv -= 8
 
+    jv = int(max(0, min(100, jv)))
+
+    # --- Randomization for bland prompts ---
+    # If no keywords matched a stat, add slight randomness (±15)
+    # This gives even "superman" or "a guy" some variety
+    if not keyword_matched["damage"]:
+        damage += random.randint(-15, 15)
+    if not keyword_matched["speed"]:
+        speed += random.randint(-15, 15)
+    if not keyword_matched["jump"]:
+        jv += random.randint(-15, 15)
+
+    # Final clamp
+    damage = int(max(5, min(100, damage)))
+    speed = int(max(5, min(100, speed)))
     jv = int(max(0, min(100, jv)))
 
     return {
