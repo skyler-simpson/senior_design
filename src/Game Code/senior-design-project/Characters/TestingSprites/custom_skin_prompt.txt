@@ -10,8 +10,8 @@ ABSOLUTE STRUCTURE RULES:
 4. Do NOT draw grid lines, separators, borders, guides, or UI.
 5. True pixel art only.
 6. All frames must be identical in width and height.
-7. Each frame must be exactly 128x128 pixels.
-8. Total canvas must be exactly 640 pixels wide.
+7. Each frame must be exactly 192x192 pixels.
+8. Total canvas must be exactly 960 pixels wide.
 9. Each row contains exactly 5 frame slots.
 10. Frames populate left-to-right only.
 11. When an animation ends, STOP the row.
@@ -41,7 +41,7 @@ SPRITE RULES:
 You MUST follow row isolation exactly.
 
 With that said, generate a sprite sheet using the following character description:
-A powerful, knight with a sword and shield. 
+Mark Grayson from the show Invincible in his season 3 outfit. 
 ANIMATION STRUCTURE (FIXED ORDER):
 
 Row 1: Idle — 5 frames
