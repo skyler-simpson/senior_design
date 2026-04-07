@@ -135,7 +135,7 @@ func start_attack():
 
 func _on_frame_changed():
 	if anim_sprite.animation == "attack":
-		if anim_sprite.frame == 4 or anim_sprite.frame == 5:
+		if anim_sprite.frame == 4 or anim_sprite.frame == 4 or anim_sprite.frame == 5:
 			sword_hitbox.monitoring = true
 		else:
 			sword_hitbox.monitoring = false
@@ -168,7 +168,7 @@ func _on_animation_finished():
 	if anim_sprite.animation == "attack":
 		current_state = State.COOLDOWN
 		sword_hitbox.monitoring = false
-		cooldown_timer.start(1.5)
+		cooldown_timer.start(1.0)
 	elif anim_sprite.animation == "hit":
 		if current_state != State.DEAD:
 			current_state = State.CHASE

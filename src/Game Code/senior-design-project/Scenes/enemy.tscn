@@ -220,7 +220,7 @@ radius = 33.60059
 radius = 71.02816
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qqxsh"]
-size = Vector2(59.25, 23.75)
+size = Vector2(68.40625, 82.4375)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1f0kj"]
 bg_color = Color(0.27450982, 0.27450982, 0.27450982, 1)
@@ -238,8 +238,8 @@ z_index = 2
 position = Vector2(2, -13)
 scale = Vector2(1.8307694, 1.6976744)
 sprite_frames = SubResource("SpriteFrames_4ycey")
-animation = &"hit"
-frame = 1
+animation = &"attack"
+frame = 4
 frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -247,7 +247,6 @@ position = Vector2(3, 8.6875)
 shape = SubResource("RectangleShape2D_8cim4")
 
 [node name="AggroRange" type="Area2D" parent="."]
-visible = false
 scale = Vector2(10, 10)
 collision_layer = 0
 collision_mask = 2
@@ -257,7 +256,6 @@ position = Vector2(0.10000229, 0.100000024)
 shape = SubResource("CircleShape2D_1f0kj")
 
 [node name="AttackRange" type="Area2D" parent="."]
-visible = false
 collision_layer = 0
 collision_mask = 2
 
@@ -266,13 +264,12 @@ position = Vector2(0, 2)
 shape = SubResource("CircleShape2D_iatxd")
 
 [node name="SwordHitbox" type="Area2D" parent="."]
-visible = false
 collision_layer = 0
 collision_mask = 2
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SwordHitbox"]
-position = Vector2(37, 6)
+position = Vector2(56, 7)
 shape = SubResource("RectangleShape2D_qqxsh")
 
 [node name="AttackCooldownTimer" type="Timer" parent="."]
