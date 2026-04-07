@@ -41,15 +41,15 @@ SPRITE RULES:
 You MUST follow row isolation exactly.
 
 With that said, generate a sprite sheet using the following character description:
-A ninja with ice powers wearing purple clothes. 
+A powerful, knight with a sword and shield. 
 ANIMATION STRUCTURE (FIXED ORDER):
 
-Row 1: Idle â€” 5 frames
-Row 2: Run â€” 5 frames
-Row 3: Jump â€” 5 frames
-Row 4: Attack â€” 5 frames
-Row 5: Hit â€” 3 frames (leave remaining 2 slots empty)
-Row 6: Death â€” 3 frames (leave remaining 2 slots empty)
+Row 1: Idle — 5 frames
+Row 2: Run — 5 frames
+Row 3: Jump — 5 frames
+Row 4: Attack — 5 frames
+Row 5: Hit — 3 frames (leave remaining 2 slots empty)
+Row 6: Death — 3 frames (leave remaining 2 slots empty)
 
 REMEMBER:
 

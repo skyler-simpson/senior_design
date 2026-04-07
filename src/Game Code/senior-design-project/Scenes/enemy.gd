@@ -34,6 +34,7 @@ func _ready():
 	attack_range.body_entered.connect(_on_attack_range_body_entered)
 	
 	anim_sprite.animation_finished.connect(_on_animation_finished)
+	anim_sprite.frame_changed.connect(_on_frame_changed)
 	
 	cooldown_timer.timeout.connect(_on_cooldown_timeout)
 	
@@ -130,7 +131,14 @@ func face_direction(dir_x):
 func start_attack():
 	current_state = State.ATTACKING
 	anim_sprite.play("attack")
-	sword_hitbox.monitoring = true
+	sword_hitbox.monitoring = false
+
+func _on_frame_changed():
+	if anim_sprite.animation == "attack":
+		if anim_sprite.frame == 4 or anim_sprite.frame == 5:
+			sword_hitbox.monitoring = true
+		else:
+			sword_hitbox.monitoring = false
 
 func _on_aggro_range_body_entered(body):
 	if body.is_in_group("player"):
