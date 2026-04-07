@@ -135,7 +135,7 @@ func start_attack():
 
 func _on_frame_changed():
 	if anim_sprite.animation == "attack":
-		if anim_sprite.frame == 4 or anim_sprite.frame == 4 or anim_sprite.frame == 5:
+		if anim_sprite.frame == 3 or anim_sprite.frame == 4 or anim_sprite.frame == 5:
 			sword_hitbox.monitoring = true
 		else:
 			sword_hitbox.monitoring = false
