@@ -18,6 +18,7 @@ var is_dead: bool = false
 
 var is_attacking: bool = false
 var is_hurt: bool = false
+var has_double_jumped: bool = false
 
 func _ready() -> void:
 	var path_to_load = ""
@@ -132,9 +133,16 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+	# Handle jump and double jump.
+	if Input.is_action_just_pressed("ui_accept"):
+		if is_on_floor():
+			velocity.y = JUMP_VELOCITY
+			has_double_jumped = false
+		elif not has_double_jumped:
+			# Double jump: second space press while in the air
+			velocity.y = JUMP_VELOCITY * 0.85
+			has_double_jumped = true
+			samurai.play("jumping")
 
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
@@ -150,6 +158,7 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0, SPEED)
 			
 		if is_on_floor():
+			has_double_jumped = false
 			if velocity.x == 0:
 				samurai.play("idle")
 			else:

@@ -74,6 +74,10 @@ func _load_stats_from_json() -> void:
 				var jump = stats.get("jump_velocity", 50)
 				var damage = stats.get("damage_amount", 50)
 
+				# Enforce minimum jump of 40 so characters can always clear obstacles
+				if jump < 40:
+					jump = 40
+
 				_set_slider_values(speed, jump, damage)
 				print("Loaded stats from JSON: SPEED=", speed, " JUMP=", jump, " DMG=", damage)
 				return
@@ -85,7 +89,7 @@ func _load_stats_from_json() -> void:
 
 func _set_slider_values(speed: int, jump: int, damage: int) -> void:
 	speed_slider.value = clamp(speed, 0, 100)
-	jump_slider.value = clamp(jump, 0, 100)
+	jump_slider.value = clamp(jump, 40, 100)
 	damage_slider.value = clamp(damage, 0, 100)
 	_update_value_labels()
 
@@ -175,9 +179,13 @@ func _on_retry_button_pressed() -> void:
 func _run_python_generation(prompt_text: String) -> void:
 	var script_path = ProjectSettings.globalize_path("res://generator.py")
 	var save_path = ProjectSettings.globalize_path("res://Characters/TestingSprites/custom_skin.png")
-	
-	var arguments = [script_path, prompt_text, save_path]
-	var output = []
-	
+
+	var project_dir = ProjectSettings.globalize_path("res://")
+	var python_exe = project_dir.path_join("../../../.venv/bin/python").simplify_path()
+	print(python_exe)
+
+	var arguments = [script_path, prompt_text, save_path, "--reuse-prompt"]
+	var python_output = []
+
 	print("Python is regenerating with prompt: ", prompt_text)
-	OS.execute("python", arguments, output, true)
+	OS.execute(python_exe, arguments, python_output)

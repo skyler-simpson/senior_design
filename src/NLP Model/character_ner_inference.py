@@ -535,7 +535,7 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
     if heavy_armor:
         jv -= 14
 
-    jv = int(max(0, min(100, jv)))
+    jv = int(max(40, min(100, jv)))
 
     # --- Randomization for bland prompts ---
     # If no keywords matched a stat, add slight randomness (±15)
@@ -550,7 +550,7 @@ def calculate_game_stats(attributes: Dict[str, Any], input_text: str = "") -> Di
     # Final clamp
     damage = int(max(5, min(100, damage)))
     speed = int(max(5, min(100, speed)))
-    jv = int(max(0, min(100, jv)))
+    jv = int(max(40, min(100, jv)))
 
     return {
         "speed": speed,
